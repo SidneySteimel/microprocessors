@@ -95,7 +95,9 @@
 // Macros
 //=========================================================================
 
-
+#define LED_GR_ON		( GPIO_SetBits(GPIOB, GPIO_Pin_2) )
+#define LED_GR_OFF		( GPIO_ResetBits(GPIOB, GPIO_Pin_2) )
+#define LED_GR_TOGGLE	( GPIO_ToggleBits(GPIOB, GPIO_Pin_2) )
 
 //=========================================================================
 // Variablen
@@ -106,8 +108,9 @@
 //=========================================================================
 // Funktionen
 //=========================================================================
-void aufgabe_A01_1_1(void);
-
+void init_leds(void);
+void init_taste_1(void);
+void init_taste_2(void);
 
 //=========================================================================
 #endif
