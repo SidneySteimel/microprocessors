@@ -8,7 +8,7 @@ int main ( void )
     // SysTick initialisieren
     // jede Millisekunde erfolgt dann der Aufruf
     // des Handlers fuer den Interrupt SysTick_IRQn
-    //InitSysTick();
+    InitSysTick();
 
     // Initialisierung aller Portleitungen und Schnittstellen
     // Freigabe von Interrupten
@@ -63,22 +63,14 @@ int main ( void )
     // -> alles braucht Energie, man sollte nichts initialisieren,
     //		was man gerade nicht mit Sicherheit braucht
 
-	usart2_init();
-
     while(1)
     {
-    	if ( GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_8) == 0) {
-    		slowMode();
-    		wait_mSek(100);
-    		usart2_send("SlowMode On!\r\n");
-    	}
-
-    	if ( GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_5) == 1) {
-    		fastMode();
-    		wait_mSek(100);
-    		usart2_send("FastMode On!\r\n");
-    	}
-
-    }
+    	LED_GR_ON;
+		timer = 10;
+		while (timer) {;} // wartet 1 Sekunde
+		LED_GR_OFF;
+		timer = 100;
+		while (timer) {;} // wartet 10 Sekunden
+	}
 
 }

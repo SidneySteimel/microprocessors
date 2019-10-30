@@ -1,5 +1,7 @@
 #include "interrupts.h"
 
+int32_t timer = 0;
+
 void hard_fault_handler_c(unsigned int * hardfault_args);
 
 //=========================================================================
@@ -59,10 +61,24 @@ void SysTick_Handler(void)
 	static unsigned long stc0 = 0;
 	static unsigned long stc1 = 0;
 	static unsigned long stc2 = 0;
+	static unsigned int stc_zehntel = 0;
+
 	stc_led++;
 	stc0++;
 	stc1++;
 	stc2++;
+	stc_zehntel++;
+
+	// timer ist eine globale variable, die jede 100 Millisekunden heruntergezählt wird
+	if (timer > 0) {
+		// stc_zehntel ist ein hilfs-counter, der bis auf eine zehntel-sekunde hoch zählt
+		if (stc_zehntel >= 100) {
+			stc_zehntel = 0;
+			timer--;
+		}
+	} else {
+		timer = 0;
+	}
 
 	//======================================================================
 	// DW1000 Timeout
@@ -108,11 +124,18 @@ void SysTick_Handler(void)
 
 	//======================================================================
 	// LED zyklisch schalten
-	if ( stc_led >= 500 )
+
+	/*
+	if ( stc_led == 500)
 		{
-		//	LED_GR_TOGGLE;
+		    LED_GR_OFF;
+		}
+	if ( stc_led >= 3500)
+		{
+			LED_GR_ON;
 			stc_led = 0;
 		}
+	*/
 }
 
 
