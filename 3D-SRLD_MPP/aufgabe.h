@@ -111,6 +111,9 @@
 void init_leds(void);
 void init_taste_1(void);
 void init_taste_2(void);
+void init_PC09(void);
+void slowMode(void);
+void fastMode(void);
 
 //=========================================================================
 #endif

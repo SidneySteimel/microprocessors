@@ -8,16 +8,16 @@ int main ( void )
     // SysTick initialisieren
     // jede Millisekunde erfolgt dann der Aufruf
     // des Handlers fuer den Interrupt SysTick_IRQn
-    InitSysTick();
+    //InitSysTick();
 
     // Initialisierung aller Portleitungen und Schnittstellen
     // Freigabe von Interrupten
-    init_board();
+    //init_board();
 
     // Start der RTC  falls diese noch
     // nicht initialisiert war wird
     // die RTC mit der LSE-Taktquelle aktiviert
-    start_RTC();
+    //start_RTC();
 
     // Anmeldung beim WLAN Access Point
     // SSID: MPP_IoT
@@ -33,38 +33,52 @@ int main ( void )
     //CoStartOS ();
 
 	// Beispiel für die Loesung einer Aufgabe
+    // init_PC09();
     init_leds();
     init_taste_1();
     init_taste_2();
- 	uint8_t     Byte_t2 = 1;
- 	uint8_t     Byte_t1 = 0;
-   	uint8_t     counter = 0;
-   	char buff[100];
 
-    while (1)
+    // mit SystemInit wird ein takt von 168 MHz genutzt
+    // die LED blinkt im gewünschten Sekundentakt
+    // Stromverbrauch liegt bei 77 mA
+
+    // ohne SystemInit wird niedrigerer interner system takt verwendet
+    // der takt der LED ist entsprechend ca. um x10 verlangsamt
+    // und gemessene taktfrequenz liegt bei 16 MHz
+    // Stromverbrauch von 33 mA, da sämtliche geräte langsamer (bzw. nicht so häufig) arbeiten
+    // und weniger hardware/geräte initialisiert worden sind
+
+    // slowMode:
+    // Stromverbrauch nur 31 mA
+    // Taktfrequenz 24 MHz
+
+    // fastMode:
+    // Stromverbrauch 68 mA
+    // Taktfrequenz 168 MHz
+
+    // ohne init_PC09():
+    // hier wird natürlich nichts gemessen, da der Pin ohne diese Konfigurierung nicht aktiv ist
+    // und kein Signal ausgibt
+    // -> was auffällt ist, dass ohne diese Pin-Konfiguration 3mA Stromverbrauch eingespart werden
+    // -> alles braucht Energie, man sollte nichts initialisieren,
+    //		was man gerade nicht mit Sicherheit braucht
+
+	usart2_init();
+
+    while(1)
     {
-    	 sprintf(buff,"%.2d\r\n", counter);
-    	 usart2_send(buff);
-    	 Byte_t2 = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_8);
-    	 if ( Byte_t2 == 0 && counter == 0) {
-    			 counter++;
-    			 wait_mSek(100);
-    		 }
+    	if ( GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_8) == 0) {
+    		slowMode();
+    		wait_mSek(100);
+    		usart2_send("SlowMode On!\r\n");
+    	}
 
-    	 if ( Byte_t2 == 1 && counter == 1) {
-    		 	 counter++;
-    		 	wait_mSek(100);
-    	 }
-    	 if ( Byte_t2 == 0 && counter == 2) {
-    		LED_GR_ON;
-    	    counter++;
-    	 }
+    	if ( GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_5) == 1) {
+    		fastMode();
+    		wait_mSek(100);
+    		usart2_send("FastMode On!\r\n");
+    	}
 
-    	 Byte_t1 = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_5);
-    	 if (Byte_t1 == 1){
-    		 LED_GR_OFF;
-    		 counter = 0;
-    		 Byte_t1 = 0;
-		 }
     }
+
 }

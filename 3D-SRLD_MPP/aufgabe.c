@@ -201,3 +201,112 @@ void init_taste_2(void)
 	GPIO_Init(GPIOC, &GPIO_InitStructure);
 	GPIO_ResetBits(GPIOB, GPIO_Pin_8);
 }
+
+void init_PC09(void) {
+	// SYSCLK-Clocksignal direkt auf Pin PC9 ausgeben:
+	// struct anlegen
+	GPIO_InitTypeDef GPIO_InitStructure;
+	// schalte GPIOC clock an
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC,ENABLE);
+	// setze PIN auf PIN 9
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+	// setze PIN operation mode auf alternate function mode
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+	// setze output type auf PushPull
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	// setze PullUp/PullDown auf PullUp
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
+	// setze geschwindigkeit des pins auf 50 MHz, da ein Pin immer eine Betriebsgeschwindigkeit haben muss
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	// initialisiere GPIOC mit soeben getroffenen Konfigurationen
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
+
+	// mappe die alternative funktion 'microcontroller clock output' auf GPIOC pin 9
+	GPIO_PinAFConfig(GPIOC,GPIO_Pin_9,GPIO_AF_MCO);
+	// set clock source to systemclock and do not prescale it again
+	RCC_MCO2Config(RCC_MCO2Source_SYSCLK,RCC_MCO2Div_1);
+
+}
+
+// PLLStartUp Hilfsfunktion
+void RCC_WaitForPLLStartUp(void) {
+    while ( (RCC->CR & RCC_CR_PLLRDY) == 0 ) {
+        __NOP();
+    }
+}
+
+
+//==== Taktfrequenz 16MHz ohne HSE-OSC
+void defaultMode() {
+    RCC_DeInit();
+}
+
+//==== Taktfrequenz 24MHz mit HSE-OSC=16MHz
+void slowMode(void) {
+    RCC_DeInit();
+
+    RCC_HSEConfig(RCC_HSE_ON);
+    if (RCC_WaitForHSEStartUp() == ERROR) {
+        return;
+    }
+    // HSEOSC=16MHz SYSCLK=24MHz HCLK=24MHz
+    // PCLK1=24 PCLK2=24MHz
+    RCC_PLLConfig(RCC_PLLSource_HSE,    //RCC_PLLSource
+                                16,     //PLLM
+                                192,    //PLLN
+                                8,      //PLLP
+                                4       //PLLQ
+                                );
+    RCC_PLLCmd(ENABLE);
+    RCC_WaitForPLLStartUp();
+
+    // Configures the AHB clock (HCLK)
+    RCC_HCLKConfig(RCC_SYSCLK_Div1);
+    // Low Speed APB clock (PCLK1)
+    RCC_PCLK1Config(RCC_HCLK_Div1);
+    // High Speed APB clock (PCLK2)
+    RCC_PCLK2Config(RCC_HCLK_Div1);
+
+    // select system clock source
+    RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
+
+    LED_GR_ON;
+    wait_mSek(1000);
+    LED_GR_OFF;
+}
+
+
+//==== Taktfrequenz 168MHz mit HSE-OSC=16MHz
+void fastMode(void) {
+    RCC_DeInit();
+
+    RCC_HSEConfig(RCC_HSE_ON);
+    if (RCC_WaitForHSEStartUp() == ERROR) {
+        return;
+    }
+    // HSEOSC=16MHz SYSCLK=168MHz HCLK=168MHz
+    // PCLK1=42MHz PCLK2=84MHz
+    RCC_PLLConfig(RCC_PLLSource_HSE,    //RCC_PLLSource
+                                16,     //PLLM
+                                336,    //PLLN
+                                2,      //PLLP
+                                7       //PLLQ
+                                );
+    RCC_PLLCmd(ENABLE);
+    RCC_WaitForPLLStartUp();
+
+    // Configures the AHB clock (HCLK)
+    RCC_HCLKConfig(RCC_SYSCLK_Div1);
+    // High Speed APB clock (PCLK1)
+    RCC_PCLK1Config(RCC_HCLK_Div4);
+    // High Speed APB clock (PCLK2)
+    RCC_PCLK2Config(RCC_HCLK_Div2);
+
+
+    // select system clock source
+    RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
+
+    LED_GR_ON;
+    wait_mSek(1000);
+    LED_GR_OFF;
+}
