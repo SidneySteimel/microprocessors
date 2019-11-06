@@ -108,12 +108,17 @@
 //=========================================================================
 // Funktionen
 //=========================================================================
+
 void init_leds(void);
-void init_taste_1(void);
-void init_taste_2(void);
-void init_PC09(void);
-void slowMode(void);
-void fastMode(void);
+//void init_taste_1(void);
+//void init_taste_2(void);
+//void init_PC09(void);
+//void slowMode(void);
+//void fastMode(void);
+void usart2_send_test(char* chars);
+void usart_2_print(char* zeichenkette);
+void init_usart_2_tx(void);
+void init_usart_2(void);
 
 //=========================================================================
 #endif

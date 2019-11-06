@@ -1,7 +1,7 @@
 #include "aufgabe.h"
 
 
-
+/*
 
 void aufgabe_A01_1_1(void)
 {
@@ -41,7 +41,7 @@ void aufgabe_A01_1_1(void)
 //	//Output wird nur von N-MOS bestimmt
 //	//und von PullDown auf 0 reguliert, wenn N-MOS angeschaltet ist (keine 0 ausgibt) <- widerspricht sich
 }
-
+*/
 void aufgabe_A01_1_2(void)
 	{
 	//Push/Pull - Pull Up	-> nicht sinnvoll, Pull-Widerstände nach PushPull zu verwenden
@@ -96,7 +96,7 @@ void init_leds(void)
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 	//GPIO_ResetBits(GPIOB, GPIO_Pin_2);
 }
-
+/*
 // aufgabe_A01_2_2
 void init_taste_1(void)
 {
@@ -309,4 +309,105 @@ void fastMode(void) {
     LED_GR_ON;
     wait_mSek(1000);
     LED_GR_OFF;
+}
+*/
+
+void init_usart_2() {
+	// Struct Anlegen
+	GPIO_InitTypeDef GPIO_InitStructure;
+	USART_InitTypeDef USART_InitStructure;
+
+	// Taktsystem für die USART2 freigeben
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+
+
+	// GPIO Port A Taktsystem freigeben
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+
+	// USART2 TX an PA2 mit Alternativfunktion Konfigurieren
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP ;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	// USART2 TX mit PA2 verbinden
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_USART2);
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_USART2);
+
+	// Datenprotokoll der USART einstellen
+	USART_InitStructure.USART_BaudRate = 921600;
+	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+	USART_InitStructure.USART_StopBits = USART_StopBits_1;
+	USART_InitStructure.USART_Parity = USART_Parity_No;
+	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+	USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
+	USART_Init(USART2, &USART_InitStructure);
+
+	// USART2 freigeben
+	USART_Cmd(USART2, ENABLE); // enable USART2
+
+	// Falls ein DMA Transfer genutzt werden soll muß hier das
+	// DMA Interface aktiviert werden
+	USART_DMACmd(USART6, USART_DMAReq_Tx, ENABLE);
+}
+
+void init_usart_2_tx() {
+	// Struct Anlegen
+	GPIO_InitTypeDef GPIO_InitStructure;
+	USART_InitTypeDef USART_InitStructure;
+
+	// Taktsystem für die USART2 freigeben
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+
+
+	// GPIO Port A Taktsystem freigeben
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+
+	// USART2 TX an PA2 mit Alternativfunktion Konfigurieren
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP ;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+	// USART2 TX mit PA2 verbinden
+	GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_USART2);
+
+	// Datenprotokoll der USART einstellen
+	USART_InitStructure.USART_BaudRate = 921600;
+	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+	USART_InitStructure.USART_StopBits = USART_StopBits_1;
+	USART_InitStructure.USART_Parity = USART_Parity_No;
+	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+	USART_InitStructure.USART_Mode = USART_Mode_Tx;
+	USART_Init(USART2, &USART_InitStructure);
+
+	// USART2 freigeben
+	USART_Cmd(USART2, ENABLE); // enable USART2
+
+	// Falls ein DMA Transfer genutzt werden soll muß hier das
+	// DMA Interface aktiviert werden
+	USART_DMACmd(USART6, USART_DMAReq_Tx, ENABLE);
+}
+void usart2_send_test(char* chars)
+{
+    int i = 0;
+    for(i = 0;i < strlen(chars);i++)
+    {
+        USART_SendData(USART2, chars[i]);
+        wait_mSek(1000);
+        while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET){}
+    }
+}
+
+void usart_2_print(char* zeichenkette) {
+    int i = 0;
+    for(i = 0;i < strlen(zeichenkette);i++)
+    {
+        USART_SendData(USART2, zeichenkette[i]);
+        while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET){}
+    }
 }

@@ -34,9 +34,8 @@ int main ( void )
 
 	// Beispiel für die Loesung einer Aufgabe
     // init_PC09();
-    init_leds();
-    init_taste_1();
-    init_taste_2();
+    // init_taste_1();
+    // init_taste_2();
 
     // mit SystemInit wird ein takt von 168 MHz genutzt
     // die LED blinkt im gewünschten Sekundentakt
@@ -63,14 +62,61 @@ int main ( void )
     // -> alles braucht Energie, man sollte nichts initialisieren,
     //		was man gerade nicht mit Sicherheit braucht
 
+
+    // TeilAufgabe 1
+    /*
+    init_usart_2_tx();
     while(1)
     {
-    	LED_GR_ON;
-		timer = 10;
-		while (timer) {;} // wartet 1 Sekunde
-		LED_GR_OFF;
-		timer = 100;
-		while (timer) {;} // wartet 10 Sekunden
-	}
+    	usart2_send_test("0123456789");
+    }*/
 
+
+    // TeilAufgabe 2
+    /*
+    init_usart_2_tx();
+    int counter = 0;
+    char zeichenkette[50];
+    while(1)
+    {
+    	sprintf(zeichenkette, "Hello World!%d\r\n", counter);
+    	counter++;
+    	usart_2_print(zeichenkette);
+    	wait_mSek(500);
+
+    }*/
+
+    //TeilAufgabe 3
+    /*
+    init_leds();
+    init_usart_2();
+    char input;
+    char usart2_tx_buffer[50];
+    int wait_time = 0;
+    while(1) {
+    	// Zeichen lesen und auf ein char casten
+    	input = (char)USART_ReceiveData(USART2);
+    	if (input == '1'){
+    		wait_time = 1000;
+    		sprintf(usart2_tx_buffer, "gruene LED im 1 Sekundentakt\r\n");
+    		usart_2_print(usart2_tx_buffer);
+    	}
+    	else if (input == '2') {
+    		wait_time = 2000;
+			sprintf(usart2_tx_buffer, "gruene LED im 2 Sekundentakt\r\n");
+    		usart_2_print(usart2_tx_buffer);
+		}
+    	else if (input == '4') {
+			wait_time = 4000;
+			sprintf(usart2_tx_buffer, "gruene LED im 4 Sekundentakt\r\n");
+    		usart_2_print(usart2_tx_buffer);
+    	}
+    	LED_GR_TOGGLE;
+    	wait_mSek(wait_time);
+    }
+    */
+    init_leds();
+    while (1) {
+    	LED_GR_ON;
+    }
 }
