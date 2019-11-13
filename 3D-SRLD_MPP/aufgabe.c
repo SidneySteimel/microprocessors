@@ -45,8 +45,8 @@ void aufgabe_A01_1_1(void)
 void aufgabe_A01_1_2(void)
 	{
 	//Push/Pull - Pull Up	-> nicht sinnvoll, Pull-Widerstände nach PushPull zu verwenden
-	//Push/Pull - No Pull   -> sinnvoll - bevorzugt, weil ist so!
-	//OpenDrain - Pull Up	-> sinnvoll
+	//Push/Pull - No Pull   -> sinnvoll - bevorzugt, so können wir eine 0 oder eine 1 ausgeben!
+	//OpenDrain - Pull Up	-> nicht sinnvoll, weil es dadurch zu einem Fehlverhalten des Systems kommen kann.
 	//OpenDrain - No Pull	-> nicht sinvoll, kann keine 1 ausgeben
 	}
 

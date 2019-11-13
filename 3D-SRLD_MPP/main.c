@@ -115,8 +115,27 @@ int main ( void )
     	wait_mSek(wait_time);
     }
     */
-    init_leds();
+
+    init_usart_2();
+    char input;
+    char usart2_tx_buffer[50];
+    char usart2_rx_buffer[50];
+	sprintf(usart2_tx_buffer, "");
+	sprintf(usart2_rx_buffer, "");
+    int counter=0;
     while (1) {
-    	LED_GR_ON;
+    	if (USART_GetFlagStatus(USART2, USART_FLAG_RXNE) == SET){
+    		input = (char)USART_ReceiveData(USART2);
+    		if(input != '\r') {
+    			sprintf(usart2_rx_buffer, "%s%c", usart2_rx_buffer, input);
+    			counter += 1;
+    		}
+    		else {
+    			sprintf(usart2_tx_buffer, "%s\r\n%d\r\n", usart2_rx_buffer, counter);
+    			usart_2_print(usart2_tx_buffer);
+    			sprintf(usart2_rx_buffer, "");
+    			counter = 0;
+    		}
+    	}
     }
 }
