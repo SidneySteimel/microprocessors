@@ -3,12 +3,12 @@
 int main ( void )
 {
     // Initialisierung des Systems und des Clocksystems
-    SystemInit();
+	//    SystemInit();
 
     // SysTick initialisieren
     // jede Millisekunde erfolgt dann der Aufruf
     // des Handlers fuer den Interrupt SysTick_IRQn
-    InitSysTick();
+	//    InitSysTick();
 
     // Initialisierung aller Portleitungen und Schnittstellen
     // Freigabe von Interrupten
@@ -62,24 +62,83 @@ int main ( void )
     // -> alles braucht Energie, man sollte nichts initialisieren,
     //		was man gerade nicht mit Sicherheit braucht
 
-    init_usart_2();
-    init_taste_1();
-    init_iwdg();
-    uint8_t taste;
+//    init_usart_2();
+//    init_taste_1();
+//    init_iwdg();
+//    uint8_t taste;
+//
+//    char zeichenkette[50];
+//    sprintf(zeichenkette, "\r\nNeustart\r\n");
+//    usart_2_print(zeichenkette);
+//
+//    while(1)
+//    {
+//    	sprintf(zeichenkette, "\r\nSchleife\r\n");
+//    	usart_2_print(zeichenkette);
+//
+//    	// hier wird der Abwärtszähler jede halbe Sekunde resetet.
+//    	wait_uSek(500000);
+//    	IWDG_ReloadCounter();
+//
+//    	if ( GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_5) == 1) {
+//    		usart_2_print("\r\nTaste2 gedrückt\r\n");
+//    		// hier warten wir mehr als 5 Sekunden und zwar 6, damit der Watchdog nach 5 Sekunden
+//    		// die Schleife unterbricht.
+//    		wait_uSek(6000000);
+//    	}
+//    }
+		char usart2_tx_buffer[50];
+		unsigned char value_watchdog_counter = 0x7f;
+	    unsigned char window_value = 0x50;
+	    unsigned char window_value_refresh = 0x50;
+	    unsigned char cnt_i = 0;
+	    unsigned char cnt_j = 0;
 
-    char zeichenkette[50];
-    sprintf(zeichenkette, "\r\nNeustart\r\n");
-    usart_2_print(zeichenkette);
+	    SystemInit();
 
-    while(1)
-    {
-    	sprintf(zeichenkette, "\r\nSchleife\r\n");
-    	usart_2_print(zeichenkette);
-    	wait_uSek(500000);
-    	IWDG_ReloadCounter();
-    	if ( GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_5) == 1) {
-    		usart_2_print("\r\nTaste2 gedrückt\r\n");
-    		wait_uSek(6000000);
-    	}
-    }
+	    init_usart_2();
+
+	    sprintf(usart2_tx_buffer,"\r\nNeustart\r\n");
+	    usart_2_print(usart2_tx_buffer);
+
+	    RCC_APB1PeriphClockCmd(RCC_APB1Periph_WWDG, ENABLE);
+
+	    WWDG_SetPrescaler(WWDG_Prescaler_8);
+	    WWDG_SetWindowValue(window_value);
+	    WWDG_Enable(value_watchdog_counter);
+
+	    cnt_i = (unsigned char) (value_watchdog_counter + 1);
+
+	    while(1){
+
+	        cnt_j = (unsigned char) ((WWDG->CR) & 0x7F) ;
+
+	        if (cnt_j  < cnt_i ) {
+
+	            sprintf(usart2_tx_buffer,"i = %u\r\n",cnt_j);
+	            usart_2_print(usart2_tx_buffer);
+
+	            cnt_i = cnt_j;
+
+	            if (cnt_i == window_value_refresh ) {
+
+	                WWDG_SetCounter(value_watchdog_counter);
+
+	                sprintf(usart2_tx_buffer,"####### neu geladen\r\n");
+	                usart_2_print(usart2_tx_buffer);
+
+	                cnt_i = (unsigned char) (value_watchdog_counter + 1);
+	            }
+	        }
+	    }
+	    /*
+	     * value_watchdog_counter zählt runter von 7f bis 3f (127, 63)
+	     * window_value bestimmt das Fenster, in dem der zähler nicht resetet werden darf.
+	     * window_value_refresh bestimmt der Punkt, an dem der Zähler resetet wird.
+	     * window_value und window_value_refresh sind nur sinnvoll zwischen (127, 63)
+	     * ----------
+	     * ist der Wert von window_value_refresh > window_value wird das reseten von dem Zähler blockiert und es wird sofort neugestartet.
+	     * ist der Wert von window_value_refresh < window_value wird das reseten von dem Zähler durchgeführt und nicht neugestartet.
+	     * sollten die werte außerhalb des Zählerbereiches liegen, startet der Watchdog das System nach dem runterzählen neu
+	     */
 }
