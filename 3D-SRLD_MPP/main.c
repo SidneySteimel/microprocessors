@@ -62,80 +62,24 @@ int main ( void )
     // -> alles braucht Energie, man sollte nichts initialisieren,
     //		was man gerade nicht mit Sicherheit braucht
 
+    init_usart_2();
+    init_taste_1();
+    init_iwdg();
+    uint8_t taste;
 
-    // TeilAufgabe 1
-    /*
-    init_usart_2_tx();
-    while(1)
-    {
-    	usart2_send_test("0123456789");
-    }*/
-
-
-    // TeilAufgabe 2
-    /*
-    init_usart_2_tx();
-    int counter = 0;
     char zeichenkette[50];
+    sprintf(zeichenkette, "\r\nNeustart\r\n");
+    usart_2_print(zeichenkette);
+
     while(1)
     {
-    	sprintf(zeichenkette, "Hello World!%d\r\n", counter);
-    	counter++;
+    	sprintf(zeichenkette, "\r\nSchleife\r\n");
     	usart_2_print(zeichenkette);
-    	wait_mSek(500);
-
-    }*/
-
-    //TeilAufgabe 3
-    /*
-    init_leds();
-    init_usart_2();
-    char input;
-    char usart2_tx_buffer[50];
-    int wait_time = 0;
-    while(1) {
-    	// Zeichen lesen und auf ein char casten
-    	input = (char)USART_ReceiveData(USART2);
-    	if (input == '1'){
-    		wait_time = 1000;
-    		sprintf(usart2_tx_buffer, "gruene LED im 1 Sekundentakt\r\n");
-    		usart_2_print(usart2_tx_buffer);
-    	}
-    	else if (input == '2') {
-    		wait_time = 2000;
-			sprintf(usart2_tx_buffer, "gruene LED im 2 Sekundentakt\r\n");
-    		usart_2_print(usart2_tx_buffer);
-		}
-    	else if (input == '4') {
-			wait_time = 4000;
-			sprintf(usart2_tx_buffer, "gruene LED im 4 Sekundentakt\r\n");
-    		usart_2_print(usart2_tx_buffer);
-    	}
-    	LED_GR_TOGGLE;
-    	wait_mSek(wait_time);
-    }
-    */
-
-    init_usart_2();
-    char input;
-    char usart2_tx_buffer[50];
-    char usart2_rx_buffer[50];
-	sprintf(usart2_tx_buffer, "");
-	sprintf(usart2_rx_buffer, "");
-    int counter=0;
-    while (1) {
-    	if (USART_GetFlagStatus(USART2, USART_FLAG_RXNE) == SET){
-    		input = (char)USART_ReceiveData(USART2);
-    		if(input != '\r') {
-    			sprintf(usart2_rx_buffer, "%s%c", usart2_rx_buffer, input);
-    			counter += 1;
-    		}
-    		else {
-    			sprintf(usart2_tx_buffer, "%s\r\n%d\r\n", usart2_rx_buffer, counter);
-    			usart_2_print(usart2_tx_buffer);
-    			sprintf(usart2_rx_buffer, "");
-    			counter = 0;
-    		}
+    	wait_uSek(500000);
+    	IWDG_ReloadCounter();
+    	if ( GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_5) == 1) {
+    		usart_2_print("\r\nTaste2 gedrückt\r\n");
+    		wait_uSek(6000000);
     	}
     }
 }

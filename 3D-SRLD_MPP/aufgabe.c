@@ -41,7 +41,7 @@ void aufgabe_A01_1_1(void)
 //	//Output wird nur von N-MOS bestimmt
 //	//und von PullDown auf 0 reguliert, wenn N-MOS angeschaltet ist (keine 0 ausgibt) <- widerspricht sich
 }
-*/
+
 void aufgabe_A01_1_2(void)
 	{
 	//Push/Pull - Pull Up	-> nicht sinnvoll, Pull-Widerstände nach PushPull zu verwenden
@@ -96,7 +96,7 @@ void init_leds(void)
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 	//GPIO_ResetBits(GPIOB, GPIO_Pin_2);
 }
-/*
+*/
 // aufgabe_A01_2_2
 void init_taste_1(void)
 {
@@ -150,6 +150,7 @@ void init_taste_1(void)
 		GPIO_ResetBits(GPIOB, GPIO_Pin_5);
 }
 
+/*
 void init_taste_2(void)
 {
 	// Hier ein Beispiel um die Portleitungen PC0 und PC3 als
@@ -202,6 +203,7 @@ void init_taste_2(void)
 	GPIO_ResetBits(GPIOB, GPIO_Pin_8);
 }
 
+/*
 void init_PC09(void) {
 	// SYSCLK-Clocksignal direkt auf Pin PC9 ausgeben:
 	// struct anlegen
@@ -352,7 +354,7 @@ void init_usart_2() {
 	// DMA Interface aktiviert werden
 	USART_DMACmd(USART6, USART_DMAReq_Tx, ENABLE);
 }
-
+/*
 void init_usart_2_tx() {
 	// Struct Anlegen
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -392,6 +394,7 @@ void init_usart_2_tx() {
 	// DMA Interface aktiviert werden
 	USART_DMACmd(USART6, USART_DMAReq_Tx, ENABLE);
 }
+
 void usart2_send_test(char* chars)
 {
     int i = 0;
@@ -402,7 +405,7 @@ void usart2_send_test(char* chars)
         while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET){}
     }
 }
-
+*/
 void usart_2_print(char* zeichenkette) {
     int i = 0;
     for(i = 0;i < strlen(zeichenkette);i++)
@@ -410,4 +413,21 @@ void usart_2_print(char* zeichenkette) {
         USART_SendData(USART2, zeichenkette[i]);
         while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET){}
     }
+}
+
+void init_iwdg()
+{
+	// Schreibrechte aktivieren
+	    IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);
+	// Wir nutzen Prescaler 64 und Reload 2500, um 5 Sekunden zu erreichen
+	// den Vorteiler (4, 8 , 16 ,..., 256) setzen
+	    IWDG_SetPrescaler(IWDG_Prescaler_64);
+	// den Wert (0...4095) einstellen ab dem runtergezählt wird
+	    IWDG_SetReload(2500);
+	// setzt den Wachdog auf den eingestellten Maximalwert
+	    IWDG_ReloadCounter();
+	// aktiviert dem IWDG
+	    IWDG_Enable();
+	// Das Zeitintervall t berechnet sich folgendermaßen
+	// t = (1/32000) * 16 * 2500 = 1,25 Sekunden
 }
