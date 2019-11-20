@@ -49,7 +49,7 @@ void aufgabe_A01_1_2(void)
 	//OpenDrain - Pull Up	-> nicht sinnvoll, weil es dadurch zu einem Fehlverhalten des Systems kommen kann.
 	//OpenDrain - No Pull	-> nicht sinvoll, kann keine 1 ausgeben
 	}
-
+*/
 // aufgabe_A01_1_3
 void init_leds(void)
 {
@@ -96,9 +96,8 @@ void init_leds(void)
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 	//GPIO_ResetBits(GPIOB, GPIO_Pin_2);
 }
-*/
-// aufgabe_A01_2_2
-void init_taste_1(void)
+
+void init_taste_1_irq(void)
 {
 	// Hier ein Beispiel um die Portleitungen PC0 und PC3 als
 		// Ausgänge im HighSpeed-Mode mit PullUp Widerständen
@@ -107,6 +106,9 @@ void init_taste_1(void)
 
 		// Taktquelle für die Peripherie aktivieren
 		RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
+
+		// Schaltet Taktsystem zu
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
 
 		// Struct anlegen
 		GPIO_InitTypeDef GPIO_InitStructure;
@@ -148,10 +150,12 @@ void init_taste_1(void)
 		// PortLeitungen initialisieren
 		GPIO_Init(GPIOC, &GPIO_InitStructure);
 		GPIO_ResetBits(GPIOB, GPIO_Pin_5);
+
+
 }
 
-/*
-void init_taste_2(void)
+
+void init_taste_2_irq(void)
 {
 	// Hier ein Beispiel um die Portleitungen PC0 und PC3 als
 	// Ausgänge im HighSpeed-Mode mit PullUp Widerständen
@@ -313,7 +317,6 @@ void fastMode(void) {
     LED_GR_OFF;
 }
 */
-
 void init_usart_2() {
 	// Struct Anlegen
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -414,7 +417,7 @@ void usart_2_print(char* zeichenkette) {
         while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET){}
     }
 }
-
+/*
 void init_iwdg()
 {
 	// Schreibrechte aktivieren
@@ -430,4 +433,81 @@ void init_iwdg()
 	    IWDG_Enable();
 	// Das Zeitintervall t berechnet sich folgendermaßen
 	// t = (1/32000) * 16 * 2500 = 1,25 Sekunden
+}
+*/
+
+void init_interrupts() {
+	//==========================================================
+	//========= Interrupt Konfiguration
+	//==========================================================
+	// Taste 2
+	// Bindet Port C Leitung 5 an die EXTI_Line5 Leitung
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOC, EXTI_PinSource5);
+
+	// Struct anlegen
+	EXTI_InitTypeDef EXTI_InitStructure;
+
+	// EXTI_Line zweisen
+	EXTI_InitStructure.EXTI_Line = EXTI_Line5;
+
+	// Interrupt Mode setzen
+	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+		// EXTI_Mode_Interrupt
+		// EXTI_Mode_Event
+
+	// Triggerbedingung setzen
+	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
+		// EXTI_Trigger_Rising
+		// EXTI_Trigger_Falling
+		// EXTI_Trigger_Rising_Falling
+
+	// Interrupt erlauben
+	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+
+	// Regiser aus dem Struct heraus setzen
+	EXTI_Init(&EXTI_InitStructure);
+
+
+	// Taste 1
+	// Bindet Port C Leitung 8 an die EXTI_Line8 Leitung
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOC, EXTI_PinSource8);
+	EXTI_InitStructure.EXTI_Line = EXTI_Line8;
+	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
+	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+	EXTI_Init(&EXTI_InitStructure);
+}
+
+void init_nvic() {
+	//==========================================================
+	//========= Interruptcontroller Konfiguration
+	//==========================================================
+
+	// Anlegen eines NVIC Struct
+	NVIC_InitTypeDef NVIC_InitStructure;
+
+	// Festlegung der Interruptquelle
+	NVIC_InitStructure.NVIC_IRQChannel = EXTI9_5_IRQn;
+
+	// Festlegung der Priorität entweder in 5 Gruppen
+	//======================================================
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
+	    // NVIC_PriorityGroup_0 hohe Priorität
+		// ...
+	    // NVIC_PriorityGroup_4 niedrige Priorität
+	//======================================================
+
+	// oder feiner gegliedert in Priorität und Subpriorität
+	//======================================================
+	//NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	    // 0..15
+	//NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	    // 0...15
+	//======================================================
+
+	// Interruptkanal Freigabe
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+
+	// Register aus dem Struct heraus schreiben
+	NVIC_Init(&NVIC_InitStructure);
 }
