@@ -318,7 +318,7 @@ void fastMode(void) {
     LED_GR_OFF;
 }
 */
-void init_usart_2_irq_rx() {
+void init_usart_2() {
 	// Struct Anlegen
 	GPIO_InitTypeDef GPIO_InitStructure;
 	USART_InitTypeDef USART_InitStructure;
@@ -353,23 +353,6 @@ void init_usart_2_irq_rx() {
 
 	// USART2 freigeben
 	USART_Cmd(USART2, ENABLE); // enable USART2
-
-	// Falls ein DMA Transfer genutzt werden soll muß hier das
-	// DMA Interface aktiviert werden
-	// USART_DMACmd(USART6, USART_DMAReq_Tx, ENABLE);
-
-	// irq ready
-	NVIC_InitTypeDef NVIC_InitStructure;
-
-	NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
-
-	// Die Freigabe des zugehörigen Interrupts sieht wie fogt aus:
-	USART_ClearITPendingBit(USART2, USART_IT_RXNE);
-	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
 }
 /*
 void init_usart_2_tx() {
