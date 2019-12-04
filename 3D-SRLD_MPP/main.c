@@ -4,11 +4,9 @@ int main ( void )
 {
     // Initialisierung des Systems und des Clocksystems
 	//    SystemInit();
-
     // SysTick initialisieren
     // jede Millisekunde erfolgt dann der Aufruf
     // des Handlers fuer den Interrupt SysTick_IRQn
-	//    InitSysTick();
 
     // Initialisierung aller Portleitungen und Schnittstellen
     // Freigabe von Interrupten
@@ -32,13 +30,12 @@ int main ( void )
     // Start des Betriebssystems CoOS
     //CoStartOS ();
 
+
 	SystemInit();
-	init_usart_2();
+    InitSysTick();
+	init_usart_2_irq_rx();
 	init_leds();
-	init_taste_1_irq();
-    init_taste_2_irq();
-    init_interrupts();
-    init_nvic();
+
 
 	while(1){
 

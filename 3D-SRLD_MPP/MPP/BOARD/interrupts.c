@@ -1,6 +1,8 @@
 #include "interrupts.h"
 
 int32_t timer = 0;
+int led_on = 0;
+int wait_time = 1000;
 
 void hard_fault_handler_c(unsigned int * hardfault_args);
 
@@ -67,17 +69,12 @@ void SysTick_Handler(void)
 	stc0++;
 	stc1++;
 	stc2++;
-	stc_zehntel++;
 
-	// timer ist eine globale variable, die jede 100 Millisekunden heruntergezählt wird
-	if (timer > 0) {
-		// stc_zehntel ist ein hilfs-counter, der bis auf eine zehntel-sekunde hoch zählt
-		if (stc_zehntel >= 100) {
-			stc_zehntel = 0;
-			timer--;
+	if (led_on) {
+		if (stc_led>wait_time){
+			stc_led=0;
+			LED_GR_TOGGLE;
 		}
-	} else {
-		timer = 0;
 	}
 
 	//======================================================================
@@ -397,10 +394,34 @@ void ADC_IRQHandler(void)
 //=========================================================================
 void USART2_IRQHandler(void)
 {
-	//===== USART2
-	//UART2_IRQHandler();
-	//USART2_IRQ();
-    //usart2_send("USART2_IRQn\r\n");
+//	===== USART2
+//	UART2_IRQHandler();
+//	USART2_IRQ();
+//  usart2_send("USART2_IRQn\r\n");
+//	usart_2_print("USART2_IRQn\r\n");
+
+	char zeichen;
+
+	if (USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)
+		{
+			zeichen = (char)USART_ReceiveData(USART2);
+ 			if (zeichen=='1')
+				{
+					wait_time = 1000;
+					led_on = 1;
+				}
+ 			if (zeichen=='4')
+				{
+					wait_time = 4000;
+					led_on = 1;
+				}
+ 			if (zeichen=='s')
+				{
+					LED_GR_OFF;
+					led_on = 0;
+				}
+		}
+
 }
 
 

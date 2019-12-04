@@ -110,18 +110,18 @@
 //=========================================================================
 
 void init_leds(void);
-void init_taste_1_irq(void);
-void init_taste_2_irq(void);
+//void init_taste_1_irq(void);
+//void init_taste_2_irq(void);
 //void init_PC09(void);
 //void slowMode(void);
 //void fastMode(void);
 //void usart2_send_test(char* chars);
 void usart_2_print(char* zeichenkette);
 //void init_usart_2_tx(void);
-void init_usart_2(void);
+void init_usart_2_irq_rx(void);
 //void init_iwdg(void);
-void init_interrupts(void);
-void init_nvic(void);
+//void init_interrupts(void);
+//void init_nvic(void);
 
 //=========================================================================
 #endif
