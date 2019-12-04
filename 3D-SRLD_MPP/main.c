@@ -32,7 +32,7 @@ int main ( void )
 
 
 	SystemInit();
-    InitSysTick();
+	InitSysTick();
 	init_usart_2_irq_rx();
 	init_leds();
 

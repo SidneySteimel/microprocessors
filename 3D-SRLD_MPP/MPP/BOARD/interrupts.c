@@ -3,6 +3,8 @@
 int32_t timer = 0;
 int led_on = 0;
 int wait_time = 1000;
+char usart2_tx_buffer[USART2_TX_BUFFERSIZE];
+char usart2_rx_buffer[USART2_RX_BUFFERSIZE];
 
 void hard_fault_handler_c(unsigned int * hardfault_args);
 
@@ -63,7 +65,6 @@ void SysTick_Handler(void)
 	static unsigned long stc0 = 0;
 	static unsigned long stc1 = 0;
 	static unsigned long stc2 = 0;
-	static unsigned int stc_zehntel = 0;
 
 	stc_led++;
 	stc0++;
@@ -214,7 +215,6 @@ void EXTI4_IRQHandler(void)
 //=========================================================================
 int counter_taster2 = 0;
 int counter_taster1 = 0;
-char usart2_tx_buffer[50];
 
 void EXTI9_5_IRQHandler(void)
 {
@@ -401,27 +401,26 @@ void USART2_IRQHandler(void)
 //	usart_2_print("USART2_IRQn\r\n");
 
 	char zeichen;
+	static int j = 0;
 
 	if (USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)
 		{
 			zeichen = (char)USART_ReceiveData(USART2);
- 			if (zeichen=='1')
+ 			if (zeichen=='\r')	// Ende Zeichenketten Eingabe
 				{
-					wait_time = 1000;
-					led_on = 1;
+					usart2_rx_buffer[j] = 0x00 ;
+					sprintf(usart2_tx_buffer, "Zeichenkette=%s Länge=%d\r\n", usart2_rx_buffer, j);
+					usart_2_print(usart2_tx_buffer);
+					memset(usart2_rx_buffer,0x00,20);
+					j=0;
 				}
- 			if (zeichen=='4')
+			else
 				{
-					wait_time = 4000;
-					led_on = 1;
-				}
- 			if (zeichen=='s')
-				{
-					LED_GR_OFF;
-					led_on = 0;
+					usart2_rx_buffer[j] = zeichen;
+					j++;
+					if (j >= 30) { j = 0; }
 				}
 		}
-
 }
 
 
