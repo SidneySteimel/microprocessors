@@ -406,11 +406,20 @@ void USART2_IRQHandler(void)
 	if (USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)
 		{
 			zeichen = (char)USART_ReceiveData(USART2);
+			sprintf(usart2_tx_buffer, "%c", zeichen);
+			usart_2_print(usart2_tx_buffer);
  			if (zeichen=='\r')	// Ende Zeichenketten Eingabe
 				{
-					usart2_rx_buffer[j] = 0x00 ;
-					sprintf(usart2_tx_buffer, "Zeichenkette=%s Länge=%d\r\n", usart2_rx_buffer, j);
-					usart_2_print(usart2_tx_buffer);
+					usart2_rx_buffer[j] = 0x00;
+					dateTimeFilter(usart2_rx_buffer);
+
+					RTC_DateTypeDef RTC_Date_Aktuell;//  Datum
+					char data[50] = {0};
+					// Datum aus der RTC in das Struct laden
+					RTC_GetDate(RTC_Format_BIN, &RTC_Date_Aktuell);
+					sprintf(data,"\r\n%.2d-%.2d-%.2d-%.2d\r\n",RTC_Date_Aktuell.RTC_Year, RTC_Date_Aktuell.RTC_Month, RTC_Date_Aktuell.RTC_Date, RTC_Date_Aktuell.RTC_WeekDay);
+					usart_2_print(data);
+
 					memset(usart2_rx_buffer,0x00,20);
 					j=0;
 				}

@@ -353,6 +353,20 @@ void init_usart_2() {
 
 	// USART2 freigeben
 	USART_Cmd(USART2, ENABLE); // enable USART2
+
+	// irq ready
+	NVIC_InitTypeDef NVIC_InitStructure;
+
+	NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+
+	// Die Freigabe des zugehörigen Interrupts sieht wie fogt aus:
+	USART_ClearITPendingBit(USART2, USART_IT_RXNE);
+	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+
 }
 /*
 void init_usart_2_tx() {
@@ -510,3 +524,53 @@ void init_nvic() {
 	NVIC_Init(&NVIC_InitStructure);
 }
 */
+
+void dateTimeFilter(char* buf) {
+	if(strlen(buf) != 11) {
+		usart_2_print("Wrong FORMAT! use xx-xx-xx-xx for Date or xx:xx:xx:xx for time.");
+		return;
+	}
+	int isDate = -1; // 0 for Time und 1 for Date -1 for wrong format
+
+	if(buf[2] == '-' && buf[5] == '-' && buf[8] == '-') {
+		isDate = 1;
+	}
+	else if(buf[2] == ':' && buf[5] == ':' && buf[8] == ':') {
+		isDate = 0;
+	}
+	else {
+		usart_2_print("Wrong FORMAT! use xx-xx-xx-xx for Date or xx:xx:xx:xx for time.");
+		return;
+	}
+
+	int numbers [4];
+	char* numInStr [3];
+	int c =0;
+	int i;
+	for (i = 0;  i < strlen(buf); i = i + 3) {
+		if( buf[i] >= '0' && buf[i] <= '9' && buf[i+1] >= '0' && buf[i+1] <= '9' ){
+			sprintf(numInStr, "%c%c\0", buf[i], buf[i+1]);
+			numbers[c] = atoi(numInStr);
+			c++;
+		}
+		else {
+			usart_2_print("Wrong FORMAT! use xx-xx-xx-xx for Date or xx:xx:xx:xx for time.");
+			return;
+		}
+	}
+
+
+	if(isDate){
+		RTC_DateTypeDef RTC_Date_Struct;
+
+		RTC_Date_Struct.RTC_Year = numbers[0];
+		RTC_Date_Struct.RTC_Month= numbers[1];
+		RTC_Date_Struct.RTC_Date= numbers[2];
+		RTC_Date_Struct.RTC_WeekDay= numbers[3];
+
+		RTC_SetDate(RTC_Format_BCD, &RTC_Date_Struct);
+	}
+
+
+
+}

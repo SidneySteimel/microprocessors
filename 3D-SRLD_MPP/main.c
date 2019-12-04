@@ -37,20 +37,6 @@ int main ( void )
 
 
 	while(1){
-		wait_mSek(1000);
-		// Anlegen der Structs für aktuelle Daten
-		RTC_TimeTypeDef RTC_Time_Aktuell; //  Zeit
-		RTC_DateTypeDef RTC_Date_Aktuell; //  Datum
 
-		char data[50] = {0};
-
-		// Datum aus der RTC in das Struct laden
-		RTC_GetDate(RTC_Format_BIN, &RTC_Date_Aktuell);
-		sprintf(data,"\r\n\nDatum: %.2d-%.2d-%.2d, Tag: %.2d",RTC_Date_Aktuell.RTC_Year, RTC_Date_Aktuell.RTC_Month, RTC_Date_Aktuell.RTC_Date, RTC_Date_Aktuell.RTC_WeekDay);
-		usart_2_print(data);
-		// Zeit aus der RTC in das Struct laden
-		RTC_GetTime(RTC_Format_BIN, &RTC_Time_Aktuell);
-		sprintf(data,"\r\nUhrzeit: %.2d:%.2d:%.2d:%.2d",RTC_Time_Aktuell.RTC_Hours, RTC_Time_Aktuell.RTC_Minutes, RTC_Time_Aktuell.RTC_Seconds, RTC_Time_Aktuell.RTC_H12);
-		usart_2_print(data);
 	}
 }
