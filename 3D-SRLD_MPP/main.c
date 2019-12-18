@@ -49,15 +49,37 @@ int main ( void )
 		if ( Byte_t2 == 0 && previous == 1) {
 			// LED an
 			LED_GR_ON;
+			usart_2_print("\n\rStop Mode Start");
 
-			// Wechsel in den Sleep Mode mit einem der beiden Befehle:
-			// __WFI() - wait for Interrupt oder
-			// __WFE() - wait for Event
-			usart_2_print("\n\rSleep Mode Start");
-			__WFI();
-			// durch einen Interrupt getriggert und nach Abarbeitung der ISR
-			// wird die weitere Programmabarbeitung gestartet
-			usart_2_print("\n\rSleep Mode Ende");
+			// nach Bedarf alle Peripherieeinheiten ausschalten
+			// ...
+			// interne oder externe EXTI-Line IRQ Quellen
+			// für die Wakeup Funktion initalisieren
+			// ...
+			// SysTick-IRQ Off
+			SysTick->CTRL  &= ~SysTick_CTRL_TICKINT_Msk;
+
+			// FLASH Deep Power Down Mode
+			PWR_FlashPowerDownCmd(ENABLE);
+
+			// Stop-Mode aktivieren
+			// durch __WFI() wird hier gewartet bis die Rückkehr aus dem
+			// Stop-Mode durch die Wakup-Quellen angestossen wird
+			PWR_EnterSTOPMode(PWR_Regulator_LowPower, PWR_STOPEntry_WFI);
+
+			// FLASH Deep Power Down Mode
+			PWR_FlashPowerDownCmd(DISABLE);
+
+			// hier sollte das Clocksystem neu initialisiert werden.
+			// ansonsten läuft der Mikrocontroller mit ca. 16MHz!!
+			SystemInit();
+
+			// SysTick-IRQ On
+			SysTick->CTRL  |= SysTick_CTRL_TICKINT_Msk;
+
+			// weitere Programmabarbeitung
+
+			usart_2_print("\n\rStop Mode Ende");
 
 		} else if ( Byte_t2 == 1 ) {
 			previous = 1;
@@ -73,8 +95,13 @@ int main ( void )
 		LED_GR_OFF;
 	}
 
-	// im Sleep Mode hat unser Board einen Verbrauch von 37 mA
-	// vorher, bzw danach sind es 69/70 mA
+	// im Normalen Betrieb verbraucht unser Microcontroller 70 mA
+	// im Sleep Mode hat er nur nouch einen Verbrauch von 37 mA
 	// es sind also bei uns ca. 33 mA Stromersparnis
+
+	// im Stop Mode sind es sogar nur 22 mA
+	// der Stop Mode bietet bei diesem Minimalbeispiel höhere Stromersparnis
+	// und keine erkennbaren Nachteile außer etwas mehr Overhead im Code
+
 
 }
