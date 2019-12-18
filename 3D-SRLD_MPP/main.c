@@ -33,7 +33,9 @@ int main ( void )
 
 	SystemInit();
 	InitSysTick();
+	start_RTC();
 	init_usart_2();
+	initAlarm30();
 
 
 	while(1){

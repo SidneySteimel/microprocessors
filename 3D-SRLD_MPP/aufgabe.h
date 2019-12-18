@@ -122,7 +122,8 @@ void init_usart_2(void);
 //void init_iwdg(void);
 //void init_interrupts(void);
 //void init_nvic(void);
-void dateTimeFilter(char* buf);
+//void dateTimeFilter(char* buf);
+void initAlarm30(void);
 
 //=========================================================================
 #endif

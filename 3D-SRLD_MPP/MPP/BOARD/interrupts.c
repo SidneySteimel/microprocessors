@@ -355,8 +355,21 @@ void RTC_Alarm_IRQHandler(void)
 	//===== RTC_IT_ALRA: Alarm A interrupt
 	if(RTC_GetITStatus(RTC_IT_ALRA) != RESET)
 		{
+			RTC_DateTypeDef RTC_Date_Aktuell;//  Datum
+			RTC_TimeTypeDef RTC_Time_Aktuell; // Zeit
+			char data[50] = {0};
+			// Datum aus der RTC in das Struct laden
+			RTC_GetDate(RTC_Format_BIN, &RTC_Date_Aktuell);
+			RTC_GetTime(RTC_Format_BIN, &RTC_Time_Aktuell);
+			sprintf(data,"\r\nDATUM: %.2d-%.2d-%.2d-%.2d, UHRZEIT: %.2d:%.2d:%.2d:%.2d\r\n"
+					,RTC_Date_Aktuell.RTC_Year, RTC_Date_Aktuell.RTC_Month,RTC_Date_Aktuell.RTC_Date
+					,RTC_Date_Aktuell.RTC_WeekDay ,RTC_Time_Aktuell.RTC_Hours, RTC_Time_Aktuell.RTC_Minutes
+					,RTC_Time_Aktuell.RTC_Seconds, RTC_Time_Aktuell.RTC_H12 );
+			usart_2_print(data);
+
 			RTC_ClearITPendingBit(RTC_IT_ALRA);
 			EXTI_ClearITPendingBit(EXTI_Line17);
+			initAlarm30();
 			//	if (RTC_Alarm_CallBack[0] != NULL)
 			//	{
 			//	RTC_Alarm_CallBack[0]();
@@ -396,40 +409,45 @@ void USART2_IRQHandler(void)
 {
 //	===== USART2
 //	UART2_IRQHandler();
-//	USART2_IRQ();
+	USART2_IRQ();
 //  usart2_send("USART2_IRQn\r\n");
 //	usart_2_print("USART2_IRQn\r\n");
 
-	char zeichen;
-	static int j = 0;
-
-	if (USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)
-		{
-			zeichen = (char)USART_ReceiveData(USART2);
-			sprintf(usart2_tx_buffer, "%c", zeichen);
-			usart_2_print(usart2_tx_buffer);
- 			if (zeichen=='\r')	// Ende Zeichenketten Eingabe
-				{
-					usart2_rx_buffer[j] = 0x00;
-					dateTimeFilter(usart2_rx_buffer);
-
-					RTC_DateTypeDef RTC_Date_Aktuell;//  Datum
-					char data[50] = {0};
-					// Datum aus der RTC in das Struct laden
-					RTC_GetDate(RTC_Format_BIN, &RTC_Date_Aktuell);
-					sprintf(data,"\r\n%.2d-%.2d-%.2d-%.2d\r\n",RTC_Date_Aktuell.RTC_Year, RTC_Date_Aktuell.RTC_Month, RTC_Date_Aktuell.RTC_Date, RTC_Date_Aktuell.RTC_WeekDay);
-					usart_2_print(data);
-
-					memset(usart2_rx_buffer,0x00,20);
-					j=0;
-				}
-			else
-				{
-					usart2_rx_buffer[j] = zeichen;
-					j++;
-					if (j >= 30) { j = 0; }
-				}
-		}
+//	char zeichen;
+//	static int j = 0;
+//
+//	if (USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)
+//		{
+//			zeichen = (char)USART_ReceiveData(USART2);
+//			sprintf(usart2_tx_buffer, "%c", zeichen);
+//			usart_2_print(usart2_tx_buffer);
+// 			if (zeichen=='\r')	// Ende Zeichenketten Eingabe
+//				{
+//					usart2_rx_buffer[j] = 0x00;
+//					dateTimeFilter(usart2_rx_buffer);
+//
+//					RTC_DateTypeDef RTC_Date_Aktuell;//  Datum
+//					RTC_TimeTypeDef RTC_Time_Aktuell; // Zeit
+//					char data[50] = {0};
+//					// Datum aus der RTC in das Struct laden
+//					RTC_GetDate(RTC_Format_BIN, &RTC_Date_Aktuell);
+//					RTC_GetTime(RTC_Format_BIN, &RTC_Time_Aktuell);
+//					sprintf(data,"\r\nDATUM: %.2d-%.2d-%.2d-%.2d, UHRZEIT: %.2d:%.2d:%.2d:%.2d\r\n"
+//							,RTC_Date_Aktuell.RTC_Year, RTC_Date_Aktuell.RTC_Month,RTC_Date_Aktuell.RTC_Date
+//							,RTC_Date_Aktuell.RTC_WeekDay ,RTC_Time_Aktuell.RTC_Hours, RTC_Time_Aktuell.RTC_Minutes
+//							,RTC_Time_Aktuell.RTC_Seconds, RTC_Time_Aktuell.RTC_H12 );
+//					usart_2_print(data);
+//
+//					memset(usart2_rx_buffer,0x00,20);
+//					j=0;
+//				}
+//			else
+//				{
+//					usart2_rx_buffer[j] = zeichen;
+//					j++;
+//					if (j >= 30) { j = 0; }
+//				}
+//		}
 }
 
 

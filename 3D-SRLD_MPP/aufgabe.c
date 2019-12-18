@@ -523,7 +523,7 @@ void init_nvic() {
 	// Register aus dem Struct heraus schreiben
 	NVIC_Init(&NVIC_InitStructure);
 }
-*/
+
 
 void dateTimeFilter(char* buf) {
 	if(strlen(buf) != 11) {
@@ -544,13 +544,14 @@ void dateTimeFilter(char* buf) {
 	}
 
 	int numbers [4];
-	char* numInStr [3];
+	char* numInStr [5];
 	int c =0;
 	int i;
 	for (i = 0;  i < strlen(buf); i = i + 3) {
 		if( buf[i] >= '0' && buf[i] <= '9' && buf[i+1] >= '0' && buf[i+1] <= '9' ){
 			sprintf(numInStr, "%c%c\0", buf[i], buf[i+1]);
 			numbers[c] = atoi(numInStr);
+			//numbers[c] = strtol(numInStr, NULL, 16);
 			c++;
 		}
 		else {
@@ -561,16 +562,86 @@ void dateTimeFilter(char* buf) {
 
 
 	if(isDate){
+		// ToDo: Validate Date Values.
+
 		RTC_DateTypeDef RTC_Date_Struct;
 
 		RTC_Date_Struct.RTC_Year = numbers[0];
 		RTC_Date_Struct.RTC_Month= numbers[1];
+		//RTC_Date_Struct.RTC_Month= RTC_Month_August;
 		RTC_Date_Struct.RTC_Date= numbers[2];
 		RTC_Date_Struct.RTC_WeekDay= numbers[3];
 
-		RTC_SetDate(RTC_Format_BCD, &RTC_Date_Struct);
+		RTC_SetDate(RTC_Format_BIN, &RTC_Date_Struct);
 	}
+	else {
+		// ToDo: Validate Time Values.
 
 
+		RTC_TimeTypeDef RTC_Time_Struct;
 
-}
+		RTC_Time_Struct.RTC_Hours = numbers[0];
+		RTC_Time_Struct.RTC_Minutes = numbers[1];
+		RTC_Time_Struct.RTC_Seconds = numbers[2];
+		RTC_Time_Struct.RTC_H12 = numbers[3];
+
+		RTC_SetTime(RTC_Format_BIN, &RTC_Time_Struct);
+
+	}
+}*/
+
+void initAlarm30(){
+	RTC_AlarmCmd(RTC_Alarm_A, DISABLE);
+
+	// Anlegen der Structs für aktuelle Daten
+	RTC_TimeTypeDef RTC_Time_Aktuell; //  Zeit
+	RTC_AlarmTypeDef RTC_Alarm_Aktuell; //  Alarm
+
+	RTC_GetTime(RTC_Format_BIN, &RTC_Time_Aktuell);
+	RTC_Alarm_Aktuell.RTC_AlarmTime.RTC_Hours = RTC_Time_Aktuell.RTC_Hours;
+	RTC_Alarm_Aktuell.RTC_AlarmTime.RTC_Minutes = (RTC_Time_Aktuell.RTC_Minutes + 1) % 60;
+	RTC_Alarm_Aktuell.RTC_AlarmTime.RTC_Seconds = 30;
+
+
+	// Alarmmaske setzen kann auch verodert werden
+	RTC_Alarm_Aktuell.RTC_AlarmMask = RTC_AlarmMask_DateWeekDay // Wochentag oder Tag ausgeblendet  
+			| RTC_AlarmMask_Hours; // Stunde ausgeblendet   
+
+	RTC_SetAlarm(RTC_Format_BIN, RTC_Alarm_A, &RTC_Alarm_Aktuell);
+
+	// Anlegen der benötigten Structs
+	EXTI_InitTypeDef EXTI_InitStructure;
+	NVIC_InitTypeDef NVIC_InitStructure;
+
+	// EXTI-Line Konfiguration
+	EXTI_ClearITPendingBit(EXTI_Line17);
+	EXTI_InitStructure.EXTI_Line = EXTI_Line17;
+	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
+	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+	EXTI_Init(&EXTI_InitStructure);
+
+	// NIVC Konfiguration
+	NVIC_InitStructure.NVIC_IRQChannel = RTC_Alarm_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+
+	// Konfigurieren des Alarm A
+	RTC_ITConfig(RTC_IT_ALRA, ENABLE);
+
+	// RTC Alarm A freigeben
+	RTC_AlarmCmd(RTC_Alarm_A, ENABLE);
+
+	// Alarmflag löschen
+	RTC_ClearFlag(RTC_FLAG_ALRAF);
+
+
+	}
+//	// Alarm für den Tag oder Wochentag auswählen
+//	RTC_Alarm_Struct.RTC_AlarmDateWeekDaySel = RTC_AlarmDateWeekDaySel_Date; // Tag (1-31)     
+//	// Alarm Tag oder Wochentag setzen
+//	RTC_Alarm_Struct.RTC_AlarmDateWeekDay = 0x01; // Tag 0x01...0x31
+
+
