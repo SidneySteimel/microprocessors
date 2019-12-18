@@ -32,66 +32,39 @@ int main ( void )
 
 
 	SystemInit();
-	//InitSysTick();
+
+	InitSysTick();
+
+	start_RTC();
+
 	init_leds();
 	init_taste_1();
-	init_taste_2();
-		uint8_t Byte_t2 = 1;
-		uint8_t previous = 1;
-	init_interrupts();
-	init_nvic();
+	uint8_t Byte_t1 = 0;
 	init_usart_2();
+
+	init_RTC_wakeUp();
 
 	while(1){
 
-		// wenn taste 2 gedrückt, switch in Sleep Mode
-		Byte_t2 = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_8);
-		if ( Byte_t2 == 0 && previous == 1) {
-			// LED an
+		// wenn taste 1 gedrückt, switch in Standby Mode
+		Byte_t1 = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_5);
+		if ( Byte_t1 == 1 ) {
 			LED_GR_ON;
-			usart_2_print("\n\rStop Mode Start");
 
-			// nach Bedarf alle Peripherieeinheiten ausschalten
-			// ...
-			// interne oder externe EXTI-Line IRQ Quellen
-			// für die Wakeup Funktion initalisieren
-			// ...
-			// SysTick-IRQ Off
-			SysTick->CTRL  &= ~SysTick_CTRL_TICKINT_Msk;
+		    // Enable RTC Wakeup
+		    RTC_ITConfig(RTC_IT_WUT, ENABLE);   // Bit 14
+		    RTC_AlarmCmd(RTC_CR_WUTE, ENABLE);  // Bit 10
+		    RTC_WakeUpCmd(ENABLE);
 
-			// FLASH Deep Power Down Mode
-			PWR_FlashPowerDownCmd(ENABLE);
+		    usart_2_print("StandBy Mode Start\r\n");
+		    SysTick->CTRL  &= ~SysTick_CTRL_TICKINT_Msk;
+		    wait_uSek_CC3100(2000000);
 
-			// Stop-Mode aktivieren
-			// durch __WFI() wird hier gewartet bis die Rückkehr aus dem
-			// Stop-Mode durch die Wakup-Quellen angestossen wird
-			PWR_EnterSTOPMode(PWR_Regulator_LowPower, PWR_STOPEntry_WFI);
-
-			// FLASH Deep Power Down Mode
-			PWR_FlashPowerDownCmd(DISABLE);
-
-			// hier sollte das Clocksystem neu initialisiert werden.
-			// ansonsten läuft der Mikrocontroller mit ca. 16MHz!!
-			SystemInit();
-
-			// SysTick-IRQ On
-			SysTick->CTRL  |= SysTick_CTRL_TICKINT_Msk;
-
-			// weitere Programmabarbeitung
-
-			usart_2_print("\n\rStop Mode Ende");
-
-		} else if ( Byte_t2 == 1 ) {
-			previous = 1;
+		    PWR_EnterSTANDBYMode();
 		}
-
-
-		wait_uSek(2650000);
-		// LED an
+		wait_uSek(650000);
 		LED_GR_ON;
-
 		wait_uSek(350000);
-		// LED aus
 		LED_GR_OFF;
 	}
 
@@ -101,7 +74,7 @@ int main ( void )
 
 	// im Stop Mode sind es sogar nur 22 mA
 	// der Stop Mode bietet bei diesem Minimalbeispiel höhere Stromersparnis
-	// und keine erkennbaren Nachteile außer etwas mehr Overhead im Code
+	// und nur etwas mehr Overhead im Code und dadurch leicht höhere Aufwachzeit
 
-
+	// im Standby reduziert sich der Verbrauch noch weiter, und zwar auf nur 18mA
 }
