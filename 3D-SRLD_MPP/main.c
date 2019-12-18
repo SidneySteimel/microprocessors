@@ -32,13 +32,49 @@ int main ( void )
 
 
 	SystemInit();
-	InitSysTick();
-	start_RTC();
+	//InitSysTick();
+	init_leds();
+	init_taste_1();
+	init_taste_2();
+		uint8_t Byte_t2 = 1;
+		uint8_t previous = 1;
+	init_interrupts();
+	init_nvic();
 	init_usart_2();
-	initAlarm30();
-
 
 	while(1){
 
+		// wenn taste 2 gedrückt, switch in Sleep Mode
+		Byte_t2 = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_8);
+		if ( Byte_t2 == 0 && previous == 1) {
+			// LED an
+			LED_GR_ON;
+
+			// Wechsel in den Sleep Mode mit einem der beiden Befehle:
+			// __WFI() - wait for Interrupt oder
+			// __WFE() - wait for Event
+			usart_2_print("\n\rSleep Mode Start");
+			__WFI();
+			// durch einen Interrupt getriggert und nach Abarbeitung der ISR
+			// wird die weitere Programmabarbeitung gestartet
+			usart_2_print("\n\rSleep Mode Ende");
+
+		} else if ( Byte_t2 == 1 ) {
+			previous = 1;
+		}
+
+
+		wait_uSek(2650000);
+		// LED an
+		LED_GR_ON;
+
+		wait_uSek(350000);
+		// LED aus
+		LED_GR_OFF;
 	}
+
+	// im Sleep Mode hat unser Board einen Verbrauch von 37 mA
+	// vorher, bzw danach sind es 69/70 mA
+	// es sind also bei uns ca. 33 mA Stromersparnis
+
 }

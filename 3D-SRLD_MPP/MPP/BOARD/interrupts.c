@@ -223,17 +223,9 @@ void EXTI9_5_IRQHandler(void)
 		{
 			EXTI_ClearFlag(EXTI_Line5);
 			EXTI_ClearITPendingBit(EXTI_Line5);
-			counter_taster2++;
-			sprintf(usart2_tx_buffer,
-					"==> Taster 2 wurde %u mal gedrueckt und ein Interrupt wurde ausgeloest\r\n",
-					counter_taster2);
-			usart_2_print(usart2_tx_buffer);
-			if (counter_taster1 >= 10 && counter_taster2 == 2){
-				counter_taster2 = 0;
-				counter_taster1 = 0;
-			}
 			TASTER2_IRQ();	// ISR fuer Taste 2
 		}
+
 	//===== nicht belegt
 	if (EXTI_GetITStatus(EXTI_Line6) == SET)
 		{
@@ -241,6 +233,7 @@ void EXTI9_5_IRQHandler(void)
 			EXTI_ClearITPendingBit(EXTI_Line6);
 			// nicht belegt
 		}
+
 	//===== nicht belegt
 	if (EXTI_GetITStatus(EXTI_Line7) == SET)
 		{
@@ -248,27 +241,29 @@ void EXTI9_5_IRQHandler(void)
 			EXTI_ClearITPendingBit(EXTI_Line7);
 			// nicht belegt
 		}
+
 	//===== Taster 1
 	if (EXTI_GetITStatus(EXTI_Line8) == SET)
 		{
 			EXTI_ClearFlag(EXTI_Line8);
 			EXTI_ClearITPendingBit(EXTI_Line8);
-			counter_taster1++;
-			counter_taster2 = 0;
-			if (counter_taster1 <= 10){
-				sprintf(usart2_tx_buffer,
-						"==> Taster 1 wurde %u mal gedrueckt und ein Interrupt wurde ausgeloest\r\n",
-						counter_taster1);
-				usart_2_print(usart2_tx_buffer);
-				TASTER1_IRQ();	// ISR fuer Taste 1
-			}
-			else{
-				sprintf(usart2_tx_buffer,
-						"==> Taster 1 wurde %u mal gedrueckt aber kein Interrupt wurde ausgeloest\r\n",
-						counter_taster1);
-				usart_2_print(usart2_tx_buffer);
-			}
+//			counter_taster1++;
+//			counter_taster2 = 0;
+//			if (counter_taster1 <= 10){
+//				sprintf(usart2_tx_buffer,
+//						"==> Taster 1 wurde %u mal gedrueckt und ein Interrupt wurde ausgeloest\r\n",
+//						counter_taster1);
+//				usart_2_print(usart2_tx_buffer);
+//				TASTER1_IRQ();	// ISR fuer Taste 1
+//			}
+//			else{
+//				sprintf(usart2_tx_buffer,
+//						"==> Taster 1 wurde %u mal gedrueckt aber kein Interrupt wurde ausgeloest\r\n",
+//						counter_taster1);
+//				usart_2_print(usart2_tx_buffer);
+//			}
 		}
+
 	//===== nicht belegt
 	if (EXTI_GetITStatus(EXTI_Line9) == SET)
 		{
@@ -369,7 +364,7 @@ void RTC_Alarm_IRQHandler(void)
 
 			RTC_ClearITPendingBit(RTC_IT_ALRA);
 			EXTI_ClearITPendingBit(EXTI_Line17);
-			initAlarm30();
+			// initAlarm30();
 			//	if (RTC_Alarm_CallBack[0] != NULL)
 			//	{
 			//	RTC_Alarm_CallBack[0]();

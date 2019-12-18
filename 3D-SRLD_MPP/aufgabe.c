@@ -97,8 +97,8 @@ void init_leds(void)
 	//GPIO_ResetBits(GPIOB, GPIO_Pin_2);
 }
 
-/*
-void init_taste_1_irq(void)
+
+void init_taste_1(void)
 {
 	// Hier ein Beispiel um die Portleitungen PC0 und PC3 als
 		// Ausgänge im HighSpeed-Mode mit PullUp Widerständen
@@ -152,11 +152,10 @@ void init_taste_1_irq(void)
 		GPIO_Init(GPIOC, &GPIO_InitStructure);
 		GPIO_ResetBits(GPIOB, GPIO_Pin_5);
 
-
 }
 
 
-void init_taste_2_irq(void)
+void init_taste_2(void)
 {
 	// Hier ein Beispiel um die Portleitungen PC0 und PC3 als
 	// Ausgänge im HighSpeed-Mode mit PullUp Widerständen
@@ -208,6 +207,7 @@ void init_taste_2_irq(void)
 	GPIO_ResetBits(GPIOB, GPIO_Pin_8);
 }
 
+/*
 
 void init_PC09(void) {
 	// SYSCLK-Clocksignal direkt auf Pin PC9 ausgeben:
@@ -319,6 +319,7 @@ void fastMode(void) {
 }
 */
 void init_usart_2() {
+
 	// Struct Anlegen
 	GPIO_InitTypeDef GPIO_InitStructure;
 	USART_InitTypeDef USART_InitStructure;
@@ -367,6 +368,8 @@ void init_usart_2() {
 	USART_ClearITPendingBit(USART2, USART_IT_RXNE);
 	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
 
+	char reboot_msg[50] = "\n\rSystem Neustart\n\r";
+	usart_2_print(reboot_msg);
 }
 /*
 void init_usart_2_tx() {
@@ -447,7 +450,7 @@ void init_iwdg()
 }
 */
 
-/*
+
 void init_interrupts() {
 	//==========================================================
 	//========= Interrupt Konfiguration
@@ -482,12 +485,12 @@ void init_interrupts() {
 
 	// Taste 1
 	// Bindet Port C Leitung 8 an die EXTI_Line8 Leitung
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOC, EXTI_PinSource8);
-	EXTI_InitStructure.EXTI_Line = EXTI_Line8;
-	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
-	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-	EXTI_Init(&EXTI_InitStructure);
+//	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOC, EXTI_PinSource8);
+//	EXTI_InitStructure.EXTI_Line = EXTI_Line8;
+//	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
+//	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
+//	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
+//	EXTI_Init(&EXTI_InitStructure);
 }
 
 void init_nvic() {
@@ -524,7 +527,7 @@ void init_nvic() {
 	NVIC_Init(&NVIC_InitStructure);
 }
 
-
+/*
 void dateTimeFilter(char* buf) {
 	if(strlen(buf) != 11) {
 		usart_2_print("Wrong FORMAT! use xx-xx-xx-xx for Date or xx:xx:xx:xx for time.");
@@ -588,7 +591,7 @@ void dateTimeFilter(char* buf) {
 		RTC_SetTime(RTC_Format_BIN, &RTC_Time_Struct);
 
 	}
-}*/
+}
 
 void initAlarm30(){
 	RTC_AlarmCmd(RTC_Alarm_A, DISABLE);
@@ -644,4 +647,4 @@ void initAlarm30(){
 //	// Alarm Tag oder Wochentag setzen
 //	RTC_Alarm_Struct.RTC_AlarmDateWeekDay = 0x01; // Tag 0x01...0x31
 
-
+*/
