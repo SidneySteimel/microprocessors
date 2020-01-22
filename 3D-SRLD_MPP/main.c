@@ -1,80 +1,49 @@
 #include "main.h"
 
-int main ( void )
-{
-    // Initialisierung des Systems und des Clocksystems
-	//    SystemInit();
-    // SysTick initialisieren
-    // jede Millisekunde erfolgt dann der Aufruf
-    // des Handlers fuer den Interrupt SysTick_IRQn
 
-    // Initialisierung aller Portleitungen und Schnittstellen
-    // Freigabe von Interrupten
-    //init_board();
-
-    // Start der RTC  falls diese noch
-    // nicht initialisiert war wird
-    // die RTC mit der LSE-Taktquelle aktiviert
-    //start_RTC();
-
-    // Anmeldung beim WLAN Access Point
-    // SSID: MPP_IoT
-    //CC3100_set_in_STA_Mode(0); // WLAN
-
-    // Initialisierung des CoCox Real Time Betriebssystems CoOS
-    //CoInitOS ();
-
-    // Anmelden notwendiger Task
-    //CoCreateTask (...);
-
-    // Start des Betriebssystems CoOS
-    //CoStartOS ();
-
-
+int main(void) {
 	SystemInit();
-
 	InitSysTick();
-
 	start_RTC();
+	usart2_init();
+	init_LED();
 
-	init_leds();
-	init_taste_1();
-	uint8_t Byte_t1 = 0;
-	init_usart_2();
+//    aufgabe_A8_1_2();
+//
+//    uint8_t Byte_t1 = 0;
+//    uint8_t Byte_t2 = 0;
+//    uint32_t  start_time = 0;
+//    uint32_t  end_time = 0;
+//    uint32_t  dauer = 0;
+//    uint8_t taster_counter = 0;
+//    extern int seconds_counter;
+//
+//    while (1)
+//    {
+//    	Byte_t1 = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_8);
+//    	Byte_t2 = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_5);
+//    	if ( Byte_t1 == 0 && taster_counter == 0) {
+//    		taster_counter++;
+//    		start_time = seconds_counter;
+//    	}
+//    	if (Byte_t2 == 1 && taster_counter == 1){
+//    		end_time = seconds_counter;
+//    		dauer = (end_time -start_time);
+//    		usart2_printf("total time: %u \r\n", dauer);
+//    		taster_counter = 0;
+//    	}
+//    }
+//}
 
-	init_RTC_wakeUp();
+	extern int start_game;
 
-	while(1){
-
-		// wenn taste 1 gedrückt, switch in Standby Mode
-		Byte_t1 = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_5);
-		if ( Byte_t1 == 1 ) {
-			LED_GR_ON;
-
-		    // Enable RTC Wakeup
-		    RTC_ITConfig(RTC_IT_WUT, ENABLE);   // Bit 14
-		    RTC_AlarmCmd(RTC_CR_WUTE, ENABLE);  // Bit 10
-		    RTC_WakeUpCmd(ENABLE);
-
-		    usart_2_print("StandBy Mode Start\r\n");
-		    SysTick->CTRL  &= ~SysTick_CTRL_TICKINT_Msk;
-		    wait_uSek_CC3100(2000000);
-
-		    PWR_EnterSTANDBYMode();
+	aufgabe_A8_1_2();
+	usart2_printf("\n\rTo start a game click s\n\r");
+	char input;
+	while (1) {
+		if (start_game != 0) {
+			check_reactions();
+			start_game = 0;
 		}
-		wait_uSek(650000);
-		LED_GR_ON;
-		wait_uSek(350000);
-		LED_GR_OFF;
 	}
-
-	// im Normalen Betrieb verbraucht unser Microcontroller 70 mA
-	// im Sleep Mode hat er nur nouch einen Verbrauch von 37 mA
-	// es sind also bei uns ca. 33 mA Stromersparnis
-
-	// im Stop Mode sind es sogar nur 22 mA
-	// der Stop Mode bietet bei diesem Minimalbeispiel höhere Stromersparnis
-	// und nur etwas mehr Overhead im Code und dadurch leicht höhere Aufwachzeit
-
-	// im Standby reduziert sich der Verbrauch noch weiter, und zwar auf nur 18mA
 }

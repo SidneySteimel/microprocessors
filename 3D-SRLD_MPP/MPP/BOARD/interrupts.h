@@ -139,7 +139,7 @@ extern int32_t Tas2;
 extern int16_t T1;
 extern int16_t T2;
 extern char tasten[50];
-
+extern int start_game;
 //========== Funktionen
 
 

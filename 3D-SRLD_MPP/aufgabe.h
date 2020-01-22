@@ -95,9 +95,7 @@
 // Macros
 //=========================================================================
 
-#define LED_GR_ON		( GPIO_SetBits(GPIOB, GPIO_Pin_2) )
-#define LED_GR_OFF		( GPIO_ResetBits(GPIOB, GPIO_Pin_2) )
-#define LED_GR_TOGGLE	( GPIO_ToggleBits(GPIOB, GPIO_Pin_2) )
+
 
 //=========================================================================
 // Variablen
@@ -108,23 +106,14 @@
 //=========================================================================
 // Funktionen
 //=========================================================================
-
-void init_leds(void);
+void aufgabe_A01_1_1(void);
+void aufgabe_A8_1_1(void);
+void aufgabe_A8_1_2(void);
+void aufgabe_A8_1_3(void);
 void init_taste_1(void);
 void init_taste_2(void);
-//void init_PC09(void);
-//void slowMode(void);
-//void fastMode(void);
-//void usart2_send_test(char* chars);
-void usart_2_print(char* zeichenkette);
-//void init_usart_2_tx(void);
-void init_usart_2(void);
-//void init_iwdg(void);
-void init_interrupts(void);
-//void init_nvic(void);
-//void dateTimeFilter(char* buf);
-//void initAlarm30(void);
-void init_RTC_wakeUp(void);
+void check_reactions(void);
+
 
 //=========================================================================
 #endif

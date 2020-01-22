@@ -1,56 +1,209 @@
 #include "aufgabe.h"
 
+void aufgabe_A01_1_1(void) {
+	usart2_init();
+	int i = 0;
+	char out[20] = { 0 };
 
-/*
-
-void aufgabe_A01_1_1(void)
-{
-//	// Push/Pull - NoPull
-//	GPIO_InitStructure.GPIO_OType   = GPIO_OType_PP;  //  Push/Pull Output Setting. P-MOS / N-MOS aktiv.
-//	GPIO_InitStructure.GPIO_PuPd    = GPIO_PuPd_NOPULL; // Pull Up und Pull Down nicht aktiv
-//	//Output wird von P-MOS oder N-MOS bestimmt
-//	//und von PullUp oder PullDown nicht reguliert
-//
-//	// Push/Pull - PullUp
-//	GPIO_InitStructure.GPIO_OType   = GPIO_OType_PP;  //  Push/Pull Output Setting. P-MOS / N-MOS aktiv.
-//	GPIO_InitStructure.GPIO_PuPd    = GPIO_PuPd_UP;  // Pull up ist Aktiv, Pull Down nicht
-//	//Output wird von P-MOS oder N-MOS bestimmt
-//	//und von PullUp auf 1 reguliert, wenn nicht N-MOS angeschaltet ist (0 ausgibt)
-//
-//	// Push/Pull - PullDown
-//	GPIO_InitStructure.GPIO_OType   = GPIO_OType_PP;  //  Push/Pull Output Setting. P-MOS / N-MOS aktiv.
-//	GPIO_InitStructure.GPIO_PuPd    = GPIO_PuPd_DOWN;  // Pull Down ist Aktiv, Pull Up nicht
-//	//Output wird von P-MOS oder N-MOS bestimmt
-//	//und von PullDown auf 0 reguliert, wenn nicht P-MOS angeschaltet ist (1 ausgibt)
-//
-//	// OpenDrain - NoPull
-//	GPIO_InitStructure.GPIO_OType   = GPIO_OType_OD; // nur N-MOS wird genutzt, P-MOS nicht - bleibt immer offen
-//	GPIO_InitStructure.GPIO_PuPd    = GPIO_PuPd_NOPULL; // Pull Up und Pull Down nicht aktiv
-//	//Output wird nur von N-MOS bestimmt
-//	//und von PullUp oder PullDown nicht reguliert
-//
-//	// OpenDrain - PullUp
-//	GPIO_InitStructure.GPIO_OType   = GPIO_OType_OD; // nur N-MOS wird genutzt, P-MOS nicht - bleibt immer offen
-//	GPIO_InitStructure.GPIO_PuPd    = GPIO_PuPd_UP;  // Pull up ist Aktiv, Pull Down nicht
-//	//Output wird nur von N-MOS bestimmt
-//	//und von PullUp auf 1 reguliert, wenn P-MOS nicht angeschaltet ist (keine 0 ausgibt)
-//
-//	// OpenDrain - PullDown
-//	GPIO_InitStructure.GPIO_OType   = GPIO_OType_OD; // nur N-MOS wird genutzt, P-MOS nicht - bleibt immer offen
-//	GPIO_InitStructure.GPIO_PuPd    = GPIO_PuPd_DOWN;  // Pull Down ist Aktiv, Pull Up nicht
-//	//Output wird nur von N-MOS bestimmt
-//	//und von PullDown auf 0 reguliert, wenn N-MOS angeschaltet ist (keine 0 ausgibt) <- widerspricht sich
+	while (1) {
+		i++;
+		sprintf(out, "i=%d\r\n", i);
+		usart2_send(out);
+		if (i > 9) {
+			i = 0;
+		}
+		wait_mSek(500);
+	}
 }
 
-void aufgabe_A01_1_2(void)
-	{
-	//Push/Pull - Pull Up	-> nicht sinnvoll, Pull-Widerstände nach PushPull zu verwenden
-	//Push/Pull - No Pull   -> sinnvoll - bevorzugt, so können wir eine 0 oder eine 1 ausgeben!
-	//OpenDrain - Pull Up	-> nicht sinnvoll, weil es dadurch zu einem Fehlverhalten des Systems kommen kann.
-	//OpenDrain - No Pull	-> nicht sinvoll, kann keine 1 ausgeben
-	}
-*/
-// aufgabe_A01_1_3
+void init_taste_2(void) {
+	// Hier ein Beispiel um die Portleitungen PC0 und PC3 als
+	// Ausgänge im HighSpeed-Mode mit PullUp Widerständen
+	// an der Taktquelle RCC_APB2Periph_GPIOC
+	// zu programmieren:
+
+	// Taktquelle für die Peripherie aktivieren
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
+
+	// Schaltet Taktsystem zu
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+
+	// Struct anlegen
+	GPIO_InitTypeDef GPIO_InitStructure;
+
+	// Struct Initialisieren setzt alle Leitungen auf
+	// Eingang ohne PushPull
+	GPIO_StructInit(&GPIO_InitStructure);
+
+	//Pin 5
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+
+	// I/O-Typ soll hier Input sein
+	GPIO_InitStructure.GPIO_Mode =
+	// Auswahl des I/O Mode
+			GPIO_Mode_IN; //GPIO Input Mode
+	//  GPIO_Mode_OUT;        //GPIO Output Mode
+	//  GPIO_Mode_AF;       //GPIO Alternate function Mode
+	//  GPIO_Mode_AN;       //GPIO Analog Mode
+
+	GPIO_InitStructure.GPIO_Speed =
+	// Auswahl der Speed
+	//  GPIO_Speed_2MHz;    //  Low speed
+			GPIO_Speed_25MHz; //  Medium speed
+	//  GPIO_Speed_50MHz;   //  Fast speed
+	//   GPIO_Speed_100MHz;  //  High speed
+
+	// Port als Input verwendet, keine Output-Konfiguration nötig
+	GPIO_InitStructure.GPIO_OType =
+	// Auswahl des Output Typs
+			GPIO_OType_PP; //  PushPull
+	//  GPIO_OType_OD;      //  OpenDrain
+
+	GPIO_InitStructure.GPIO_PuPd =
+	// Auswahl des Push/Pull Typs
+			GPIO_PuPd_NOPULL; //  NoPull
+	//  GPIO_PuPd_UP;       //  PullUp
+	//  GPIO_PuPd_DOWN;     //  PullDown
+
+	// PortLeitungen initialisieren
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
+	GPIO_ResetBits(GPIOB, GPIO_Pin_5);
+
+}
+
+void init_taste_1(void) {
+	// Taktquelle für die Peripherie aktivieren
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
+
+	// Struct anlegen
+	GPIO_InitTypeDef GPIO_InitStructure;
+
+	// Struct Initialisieren setzt alle Leitungen auf
+	// Eingang ohne PushPull
+	GPIO_StructInit(&GPIO_InitStructure);
+
+	// I/O-Typ soll hier Input sein
+	GPIO_InitStructure.GPIO_Mode =
+	// Auswahl des I/O Mode
+			GPIO_Mode_IN; //GPIO Input Mode
+	//  GPIO_Mode_OUT;        //GPIO Output Mode
+	//  GPIO_Mode_AF;       //GPIO Alternate function Mode
+	//  GPIO_Mode_AN;       //GPIO Analog Mode
+
+	GPIO_InitStructure.GPIO_Speed =
+	// Auswahl der Speed
+	//  GPIO_Speed_2MHz;    //  Low speed
+			GPIO_Speed_25MHz; //  Medium speed
+	//  GPIO_Speed_50MHz;   //  Fast speed
+	//   GPIO_Speed_100MHz;  //  High speed
+
+	// Port als Input verwendet, keine Output-Konfiguration nötig
+	GPIO_InitStructure.GPIO_OType =
+	// Auswahl des Output Typs
+			GPIO_OType_PP; //  PushPull
+	//  GPIO_OType_OD;      //  OpenDrain
+
+	GPIO_InitStructure.GPIO_PuPd =
+	// Auswahl des Push/Pull Typs
+			GPIO_PuPd_NOPULL; //  NoPull
+	//  GPIO_PuPd_UP;       //  PullUp
+	//  GPIO_PuPd_DOWN;     //  PullDown
+
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
+
+	// PortLeitungen initialisieren
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
+	GPIO_ResetBits(GPIOB, GPIO_Pin_8);
+}
+
+void init_taste_1_1(void) {
+	// Taktsystem für den Port C Freigeben
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
+
+	// Struktur anlegen
+	GPIO_InitTypeDef GPIO_InitStructure;
+
+	// Portleitung in der Struktur Konfigurieren
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
+
+	// Werte aus der Struktur in die Register schreiben
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
+
+	GPIO_ResetBits(GPIOB, GPIO_Pin_8);
+}
+
+
+
+void aufgabe_A8_1_1(void) {
+
+	usart2_init();
+
+	NVIC_InitTypeDef NVIC_InitStructure;
+	NVIC_InitStructure.NVIC_IRQChannel = TIM7_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM7, ENABLE);
+
+	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+
+	TIM_TimeBaseStructure.TIM_Prescaler = 8400 - 1; // 100µs = 8400 * 1/84000000Hz
+	TIM_TimeBaseStructure.TIM_Period = 10000 - 1; // 1s = 10000 * 100µs
+	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+
+	TIM_TimeBaseInit(TIM7, &TIM_TimeBaseStructure);
+
+	TIM_SetCounter(TIM7, 0);
+
+	// Interruptflag löschen
+	TIM_ClearITPendingBit(TIM7, TIM_IT_Update);
+
+	// Interrupt erlauben
+	TIM_ITConfig(TIM7, TIM_IT_Update, ENABLE);
+
+	TIM_Cmd(TIM7, ENABLE);
+
+}
+
+void aufgabe_A8_1_2(void) {
+
+	usart2_init();
+
+	NVIC_InitTypeDef NVIC_InitStructure;
+	NVIC_InitStructure.NVIC_IRQChannel = TIM7_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM7, ENABLE);
+
+	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+
+	TIM_TimeBaseStructure.TIM_Prescaler = 8400 - 1; // 100µs = 8400 * 1/84000000Hz
+	TIM_TimeBaseStructure.TIM_Period = 10 - 1; // 1 ms = 10 * 100µs
+	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+
+	TIM_TimeBaseInit(TIM7, &TIM_TimeBaseStructure);
+
+	TIM_SetCounter(TIM7, 0);
+
+	// Interruptflag löschen
+	TIM_ClearITPendingBit(TIM7, TIM_IT_Update);
+
+	// Interrupt erlauben
+	TIM_ITConfig(TIM7, TIM_IT_Update, ENABLE);
+
+	TIM_Cmd(TIM7, ENABLE);
+}
+
 void init_leds(void)
 {
 	// Taktquelle für die Peripherie aktivieren
@@ -97,598 +250,94 @@ void init_leds(void)
 	//GPIO_ResetBits(GPIOB, GPIO_Pin_2);
 }
 
+void aufgabe_A8_1_3(void) {
 
-void init_taste_1(void)
-{
-	// Hier ein Beispiel um die Portleitungen PC0 und PC3 als
-		// Ausgänge im HighSpeed-Mode mit PullUp Widerständen
-		// an der Taktquelle RCC_APB2Periph_GPIOC
-		// zu programmieren:
+	init_taste_1_1();
 
-		// Taktquelle für die Peripherie aktivieren
-		RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
+	// Alternativfunktion der Portleitung Freigeben
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource8, GPIO_AF_TIM3);
 
-		// Schaltet Taktsystem zu
-		RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+	// Taktsystem für Timer TIM3 Freigeben
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
 
-		// Struct anlegen
-		GPIO_InitTypeDef GPIO_InitStructure;
+	// Erkennen steigender Flanke an TI1
+	TIM3->CCMR1 |= TIM_CCMR1_CC1S_0;
+	TIM3->CR2 |= TIM_CR2_TI1S;
 
-		// Struct Initialisieren setzt alle Leitungen auf
-		// Eingang ohne PushPull
-		GPIO_StructInit(&GPIO_InitStructure);
+	// Polarität
+	TIM3->CCER |= TIM_CCER_CC1P;
 
-		//Pin 5
-		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
+	// Slave Mode, external Clock Mode1, TI1FP1 Signalquelle
+	TIM3->SMCR |= TIM_SMCR_SMS + TIM_SMCR_TS_2 + TIM_SMCR_ETF_0; //TIM_SMCR_TS_0 ;
 
-		// I/O-Typ soll hier Input sein
-		GPIO_InitStructure.GPIO_Mode =
-		    // Auswahl des I/O Mode
-		      GPIO_Mode_IN;       //GPIO Input Mode
-		    //  GPIO_Mode_OUT;        //GPIO Output Mode
-		    //  GPIO_Mode_AF;       //GPIO Alternate function Mode
-		    //  GPIO_Mode_AN;       //GPIO Analog Mode
-
-		GPIO_InitStructure.GPIO_Speed =
-		    // Auswahl der Speed
-		    //  GPIO_Speed_2MHz;    //  Low speed
-		      GPIO_Speed_25MHz;   //  Medium speed
-		    //  GPIO_Speed_50MHz;   //  Fast speed
-		    //   GPIO_Speed_100MHz;  //  High speed
-
-		// Port als Input verwendet, keine Output-Konfiguration nötig
-		GPIO_InitStructure.GPIO_OType =
-		    // Auswahl des Output Typs
-		       GPIO_OType_PP;      //  PushPull
-		    //  GPIO_OType_OD;      //  OpenDrain
-
-		GPIO_InitStructure.GPIO_PuPd =
-		    // Auswahl des Push/Pull Typs
-		      GPIO_PuPd_NOPULL;   //  NoPull
-		    //  GPIO_PuPd_UP;       //  PullUp
-		    //  GPIO_PuPd_DOWN;     //  PullDown
-
-		// PortLeitungen initialisieren
-		GPIO_Init(GPIOC, &GPIO_InitStructure);
-		GPIO_ResetBits(GPIOB, GPIO_Pin_5);
-
-}
-
-
-void init_taste_2(void)
-{
-	// Hier ein Beispiel um die Portleitungen PC0 und PC3 als
-	// Ausgänge im HighSpeed-Mode mit PullUp Widerständen
-	// an der Taktquelle RCC_APB2Periph_GPIOC
-	// zu programmieren:
-
-	// Taktquelle für die Peripherie aktivieren
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
-
-	// Struct anlegen
-	GPIO_InitTypeDef GPIO_InitStructure;
-
-	// Struct Initialisieren setzt alle Leitungen auf
-	// Eingang ohne PushPull
-	GPIO_StructInit(&GPIO_InitStructure);
-
-	//Pin 8
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
-
-	// I/O-Typ soll hier Input sein
-	GPIO_InitStructure.GPIO_Mode =
-	    // Auswahl des I/O Mode
-	      GPIO_Mode_IN;       //GPIO Input Mode
-	    //  GPIO_Mode_OUT;        //GPIO Output Mode
-	    //  GPIO_Mode_AF;       //GPIO Alternate function Mode
-	    //  GPIO_Mode_AN;       //GPIO Analog Mode
-
-	GPIO_InitStructure.GPIO_Speed =
-	    // Auswahl der Speed
-	    //  GPIO_Speed_2MHz;    //  Low speed
-	      GPIO_Speed_25MHz;   //  Medium speed
-	    //  GPIO_Speed_50MHz;   //  Fast speed
-	    //   GPIO_Speed_100MHz;  //  High speed
-
-	// Port als Input verwendet, keine Output-Konfiguration nötig
-	GPIO_InitStructure.GPIO_OType =
-	    // Auswahl des Output Typs
-	       GPIO_OType_PP;      //  PushPull
-	    //  GPIO_OType_OD;      //  OpenDrain
-
-	GPIO_InitStructure.GPIO_PuPd =
-	    // Auswahl des Push/Pull Typs
-	      GPIO_PuPd_NOPULL;   //  NoPull
-	    //  GPIO_PuPd_UP;       //  PullUp
-	    //  GPIO_PuPd_DOWN;     //  PullDown
-
-	// PortLeitungen initialisieren
-	GPIO_Init(GPIOC, &GPIO_InitStructure);
-	GPIO_ResetBits(GPIOB, GPIO_Pin_8);
-}
-
-/*
-
-void init_PC09(void) {
-	// SYSCLK-Clocksignal direkt auf Pin PC9 ausgeben:
-	// struct anlegen
-	GPIO_InitTypeDef GPIO_InitStructure;
-	// schalte GPIOC clock an
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC,ENABLE);
-	// setze PIN auf PIN 9
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
-	// setze PIN operation mode auf alternate function mode
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-	// setze output type auf PushPull
-	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-	// setze PullUp/PullDown auf PullUp
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-	// setze geschwindigkeit des pins auf 50 MHz, da ein Pin immer eine Betriebsgeschwindigkeit haben muss
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	// initialisiere GPIOC mit soeben getroffenen Konfigurationen
-	GPIO_Init(GPIOC, &GPIO_InitStructure);
-
-	// mappe die alternative funktion 'microcontroller clock output' auf GPIOC pin 9
-	GPIO_PinAFConfig(GPIOC,GPIO_Pin_9,GPIO_AF_MCO);
-	// set clock source to systemclock and do not prescale it again
-	RCC_MCO2Config(RCC_MCO2Source_SYSCLK,RCC_MCO2Div_1);
-
-}
-
-// PLLStartUp Hilfsfunktion
-void RCC_WaitForPLLStartUp(void) {
-    while ( (RCC->CR & RCC_CR_PLLRDY) == 0 ) {
-        __NOP();
-    }
-}
-
-
-//==== Taktfrequenz 16MHz ohne HSE-OSC
-void defaultMode() {
-    RCC_DeInit();
-}
-
-//==== Taktfrequenz 24MHz mit HSE-OSC=16MHz
-void slowMode(void) {
-    RCC_DeInit();
-
-    RCC_HSEConfig(RCC_HSE_ON);
-    if (RCC_WaitForHSEStartUp() == ERROR) {
-        return;
-    }
-    // HSEOSC=16MHz SYSCLK=24MHz HCLK=24MHz
-    // PCLK1=24 PCLK2=24MHz
-    RCC_PLLConfig(RCC_PLLSource_HSE,    //RCC_PLLSource
-                                16,     //PLLM
-                                192,    //PLLN
-                                8,      //PLLP
-                                4       //PLLQ
-                                );
-    RCC_PLLCmd(ENABLE);
-    RCC_WaitForPLLStartUp();
-
-    // Configures the AHB clock (HCLK)
-    RCC_HCLKConfig(RCC_SYSCLK_Div1);
-    // Low Speed APB clock (PCLK1)
-    RCC_PCLK1Config(RCC_HCLK_Div1);
-    // High Speed APB clock (PCLK2)
-    RCC_PCLK2Config(RCC_HCLK_Div1);
-
-    // select system clock source
-    RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
-
-    LED_GR_ON;
-    wait_mSek(1000);
-    LED_GR_OFF;
-}
-
-
-//==== Taktfrequenz 168MHz mit HSE-OSC=16MHz
-void fastMode(void) {
-    RCC_DeInit();
-
-    RCC_HSEConfig(RCC_HSE_ON);
-    if (RCC_WaitForHSEStartUp() == ERROR) {
-        return;
-    }
-    // HSEOSC=16MHz SYSCLK=168MHz HCLK=168MHz
-    // PCLK1=42MHz PCLK2=84MHz
-    RCC_PLLConfig(RCC_PLLSource_HSE,    //RCC_PLLSource
-                                16,     //PLLM
-                                336,    //PLLN
-                                2,      //PLLP
-                                7       //PLLQ
-                                );
-    RCC_PLLCmd(ENABLE);
-    RCC_WaitForPLLStartUp();
-
-    // Configures the AHB clock (HCLK)
-    RCC_HCLKConfig(RCC_SYSCLK_Div1);
-    // High Speed APB clock (PCLK1)
-    RCC_PCLK1Config(RCC_HCLK_Div4);
-    // High Speed APB clock (PCLK2)
-    RCC_PCLK2Config(RCC_HCLK_Div2);
-
-
-    // select system clock source
-    RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
-
-    LED_GR_ON;
-    wait_mSek(1000);
-    LED_GR_OFF;
-}
-*/
-void init_usart_2() {
-
-	// Struct Anlegen
-	GPIO_InitTypeDef GPIO_InitStructure;
-	USART_InitTypeDef USART_InitStructure;
-
-	// Taktsystem für die USART2 freigeben
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
-
-
-	// GPIO Port A Taktsystem freigeben
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
-
-	// USART2 TX an PA2 mit Alternativfunktion Konfigurieren
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2 | GPIO_Pin_3;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP ;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-	// USART2 TX mit PA2 verbinden
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_USART2);
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource3, GPIO_AF_USART2);
-
-	// Datenprotokoll der USART einstellen
-	USART_InitStructure.USART_BaudRate = 921600;
-	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-	USART_InitStructure.USART_Parity = USART_Parity_No;
-	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-	USART_InitStructure.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
-	USART_Init(USART2, &USART_InitStructure);
-
-	// USART2 freigeben
-	USART_Cmd(USART2, ENABLE); // enable USART2
-
-	// irq ready
+	// Konfiguration der Interruptcontrollers
 	NVIC_InitTypeDef NVIC_InitStructure;
-
-	NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 
-	// Die Freigabe des zugehörigen Interrupts sieht wie fogt aus:
-	USART_ClearITPendingBit(USART2, USART_IT_RXNE);
-	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+	// Struktur anlegen
+	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
 
-	char reboot_msg[50] = "\n\rSystem Neustart\n\r";
-	usart_2_print(reboot_msg);
-}
-/*
-void init_usart_2_tx() {
-	// Struct Anlegen
-	GPIO_InitTypeDef GPIO_InitStructure;
-	USART_InitTypeDef USART_InitStructure;
+	// TIM3 in der Struktur konfigurieren
+	TIM_TimeBaseStructure.TIM_Prescaler = 2;
+	TIM_TimeBaseStructure.TIM_Period = 10 - 1; // Grenzwert Tastenbetätigungen
+	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 
-	// Taktsystem für die USART2 freigeben
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
+	// TIM3 Register aus der Struktur Schreiben
+	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStructure);
 
+	// TIM3 Interrupt erlauben
+	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);
 
-	// GPIO Port A Taktsystem freigeben
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+	// Counter auf 0 setzen
+	TIM_SetCounter(TIM3, 0x00);
 
-	// USART2 TX an PA2 mit Alternativfunktion Konfigurieren
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP ;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-	// USART2 TX mit PA2 verbinden
-	GPIO_PinAFConfig(GPIOA, GPIO_PinSource2, GPIO_AF_USART2);
-
-	// Datenprotokoll der USART einstellen
-	USART_InitStructure.USART_BaudRate = 921600;
-	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-	USART_InitStructure.USART_Parity = USART_Parity_No;
-	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-	USART_InitStructure.USART_Mode = USART_Mode_Tx;
-	USART_Init(USART2, &USART_InitStructure);
-
-	// USART2 freigeben
-	USART_Cmd(USART2, ENABLE); // enable USART2
-
-	// Falls ein DMA Transfer genutzt werden soll muß hier das
-	// DMA Interface aktiviert werden
-	USART_DMACmd(USART6, USART_DMAReq_Tx, ENABLE);
+	// Timer TIM3 Freigeben
+	TIM_Cmd(TIM3, ENABLE);
 }
 
-void usart2_send_test(char* chars)
-{
-    int i = 0;
-    for(i = 0;i < strlen(chars);i++)
-    {
-        USART_SendData(USART2, chars[i]);
-        wait_mSek(1000);
-        while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET){}
-    }
-}
-*/
-void usart_2_print(char* zeichenkette) {
-    int i = 0;
-    for(i = 0;i < strlen(zeichenkette);i++)
-    {
-        USART_SendData(USART2, zeichenkette[i]);
-        while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET){}
-    }
-}
-/*
-void init_iwdg()
-{
-	// Schreibrechte aktivieren
-	    IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);
-	// Wir nutzen Prescaler 64 und Reload 2500, um 5 Sekunden zu erreichen
-	// den Vorteiler (4, 8 , 16 ,..., 256) setzen
-	    IWDG_SetPrescaler(IWDG_Prescaler_64);
-	// den Wert (0...4095) einstellen ab dem runtergezählt wird
-	    IWDG_SetReload(2500);
-	// setzt den Wachdog auf den eingestellten Maximalwert
-	    IWDG_ReloadCounter();
-	// aktiviert dem IWDG
-	    IWDG_Enable();
-	// Das Zeitintervall t berechnet sich folgendermaßen
-	// t = (1/32000) * 16 * 2500 = 1,25 Sekunden
-}
-*/
-
-
-void init_interrupts() {
-	//==========================================================
-	//========= Interrupt Konfiguration
-	//==========================================================
-	// Taste 2
-	// Bindet Port C Leitung 5 an die EXTI_Line5 Leitung
-	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOC, EXTI_PinSource5);
-
-	// Struct anlegen
-	EXTI_InitTypeDef EXTI_InitStructure;
-
-	// EXTI_Line zweisen
-	EXTI_InitStructure.EXTI_Line = EXTI_Line5;
-
-	// Interrupt Mode setzen
-	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-		// EXTI_Mode_Interrupt
-		// EXTI_Mode_Event
-
-	// Triggerbedingung setzen
-	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
-		// EXTI_Trigger_Rising
-		// EXTI_Trigger_Falling
-		// EXTI_Trigger_Rising_Falling
-
-	// Interrupt erlauben
-	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-
-	// Regiser aus dem Struct heraus setzen
-	EXTI_Init(&EXTI_InitStructure);
-
-
-	// Taste 1
-	// Bindet Port C Leitung 8 an die EXTI_Line8 Leitung
-//	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOC, EXTI_PinSource8);
-//	EXTI_InitStructure.EXTI_Line = EXTI_Line8;
-//	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-//	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
-//	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-//	EXTI_Init(&EXTI_InitStructure);
-}
-
-void init_nvic() {
-	//==========================================================
-	//========= Interruptcontroller Konfiguration
-	//==========================================================
-
-	// Anlegen eines NVIC Struct
-	NVIC_InitTypeDef NVIC_InitStructure;
-
-	// Festlegung der Interruptquelle
-	NVIC_InitStructure.NVIC_IRQChannel = EXTI9_5_IRQn;
-
-	// Festlegung der Priorität entweder in 5 Gruppen
-	//======================================================
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
-	    // NVIC_PriorityGroup_0 hohe Priorität
-		// ...
-	    // NVIC_PriorityGroup_4 niedrige Priorität
-	//======================================================
-
-	// oder feiner gegliedert in Priorität und Subpriorität
-	//======================================================
-	//NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	    // 0..15
-	//NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	    // 0...15
-	//======================================================
-
-	// Interruptkanal Freigabe
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-
-	// Register aus dem Struct heraus schreiben
-	NVIC_Init(&NVIC_InitStructure);
-}
-
-/*
-void dateTimeFilter(char* buf) {
-	if(strlen(buf) != 11) {
-		usart_2_print("Wrong FORMAT! use xx-xx-xx-xx for Date or xx:xx:xx:xx for time.");
-		return;
-	}
-	int isDate = -1; // 0 for Time und 1 for Date -1 for wrong format
-
-	if(buf[2] == '-' && buf[5] == '-' && buf[8] == '-') {
-		isDate = 1;
-	}
-	else if(buf[2] == ':' && buf[5] == ':' && buf[8] == ':') {
-		isDate = 0;
-	}
-	else {
-		usart_2_print("Wrong FORMAT! use xx-xx-xx-xx for Date or xx:xx:xx:xx for time.");
-		return;
-	}
-
-	int numbers [4];
-	char* numInStr [5];
-	int c =0;
+void check_reactions(void) {
+	init_taste_1();
+	uint32_t start_time = 0;
+	uint32_t dauer = 0;
+	uint8_t taster_counter = 0;
+	uint8_t Byte_t1 = 0;
+	uint32_t max = 0;
+	uint32_t min = 0xFFFF;
+	uint32_t sum_dauer = 0;
+	extern int seconds_counter;
 	int i;
-	for (i = 0;  i < strlen(buf); i = i + 3) {
-		if( buf[i] >= '0' && buf[i] <= '9' && buf[i+1] >= '0' && buf[i+1] <= '9' ){
-			sprintf(numInStr, "%c%c\0", buf[i], buf[i+1]);
-			numbers[c] = atoi(numInStr);
-			//numbers[c] = strtol(numInStr, NULL, 16);
-			c++;
+	uint32_t zahl = 0;
+	usart2_printf("Game Starting...");
+	for (i = 0; i < 10; i++) {
+		usart2_printf("\n\rround %d\n\r", i+1);
+		zahl = Zufallszahl() % 9 + 2;
+		wait_mSek(zahl * 1000);
+		LED_GR_ON;
+		start_time = seconds_counter;
+		Byte_t1 = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_8);
+		while (Byte_t1 != 0) {
+			Byte_t1 = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_8);
 		}
-		else {
-			usart_2_print("Wrong FORMAT! use xx-xx-xx-xx for Date or xx:xx:xx:xx for time.");
-			return;
+		dauer = seconds_counter - start_time;
+		usart2_printf("Reaction time for try %d is: %dms\n\r", i + 1, dauer);
+		LED_GR_OFF;
+		if (dauer > max) {
+			max = dauer;
 		}
+		if (dauer < min){
+			min = dauer;
+		}
+		sum_dauer += dauer;
 	}
+	usart2_printf("Min Reaction time was: %dms\n\r", min);
+	usart2_printf("Max Reaction time was: %dms\n\r", max);
+	usart2_printf("AVG Reaction time was: %dms\n\r", sum_dauer/10);
 
 
-	if(isDate){
-		// ToDo: Validate Date Values.
 
-		RTC_DateTypeDef RTC_Date_Struct;
-
-		RTC_Date_Struct.RTC_Year = numbers[0];
-		RTC_Date_Struct.RTC_Month= numbers[1];
-		//RTC_Date_Struct.RTC_Month= RTC_Month_August;
-		RTC_Date_Struct.RTC_Date= numbers[2];
-		RTC_Date_Struct.RTC_WeekDay= numbers[3];
-
-		RTC_SetDate(RTC_Format_BIN, &RTC_Date_Struct);
-	}
-	else {
-		// ToDo: Validate Time Values.
-
-
-		RTC_TimeTypeDef RTC_Time_Struct;
-
-		RTC_Time_Struct.RTC_Hours = numbers[0];
-		RTC_Time_Struct.RTC_Minutes = numbers[1];
-		RTC_Time_Struct.RTC_Seconds = numbers[2];
-		RTC_Time_Struct.RTC_H12 = numbers[3];
-
-		RTC_SetTime(RTC_Format_BIN, &RTC_Time_Struct);
-
-	}
-}
-
-void initAlarm30(){
-	RTC_AlarmCmd(RTC_Alarm_A, DISABLE);
-
-	// Anlegen der Structs für aktuelle Daten
-	RTC_TimeTypeDef RTC_Time_Aktuell; //  Zeit
-	RTC_AlarmTypeDef RTC_Alarm_Aktuell; //  Alarm
-
-	RTC_GetTime(RTC_Format_BIN, &RTC_Time_Aktuell);
-	RTC_Alarm_Aktuell.RTC_AlarmTime.RTC_Hours = RTC_Time_Aktuell.RTC_Hours;
-	RTC_Alarm_Aktuell.RTC_AlarmTime.RTC_Minutes = (RTC_Time_Aktuell.RTC_Minutes + 1) % 60;
-	RTC_Alarm_Aktuell.RTC_AlarmTime.RTC_Seconds = 30;
-
-
-	// Alarmmaske setzen kann auch verodert werden
-	RTC_Alarm_Aktuell.RTC_AlarmMask = RTC_AlarmMask_DateWeekDay // Wochentag oder Tag ausgeblendet  
-			| RTC_AlarmMask_Hours; // Stunde ausgeblendet   
-
-	RTC_SetAlarm(RTC_Format_BIN, RTC_Alarm_A, &RTC_Alarm_Aktuell);
-
-	// Anlegen der benötigten Structs
-	EXTI_InitTypeDef EXTI_InitStructure;
-	NVIC_InitTypeDef NVIC_InitStructure;
-
-	// EXTI-Line Konfiguration
-	EXTI_ClearITPendingBit(EXTI_Line17);
-	EXTI_InitStructure.EXTI_Line = EXTI_Line17;
-	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
-	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-	EXTI_Init(&EXTI_InitStructure);
-
-	// NIVC Konfiguration
-	NVIC_InitStructure.NVIC_IRQChannel = RTC_Alarm_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
-
-	// Konfigurieren des Alarm A
-	RTC_ITConfig(RTC_IT_ALRA, ENABLE);
-
-	// RTC Alarm A freigeben
-	RTC_AlarmCmd(RTC_Alarm_A, ENABLE);
-
-	// Alarmflag löschen
-	RTC_ClearFlag(RTC_FLAG_ALRAF);
-
-
-	}
-//	// Alarm für den Tag oder Wochentag auswählen
-//	RTC_Alarm_Struct.RTC_AlarmDateWeekDaySel = RTC_AlarmDateWeekDaySel_Date; // Tag (1-31)     
-//	// Alarm Tag oder Wochentag setzen
-//	RTC_Alarm_Struct.RTC_AlarmDateWeekDay = 0x01; // Tag 0x01...0x31
-
-*/
-
-void init_RTC_wakeUp(void){
-	// Strukt anlegen
-	EXTI_InitTypeDef EXTI_InitStructure;
-	NVIC_InitTypeDef NVIC_InitStructure;
-
-	// EXTI-Line Konfiguration für WakeUp
-	EXTI_ClearITPendingBit(EXTI_Line22);
-	EXTI_InitStructure.EXTI_Line = EXTI_Line22;
-	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
-	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
-	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
-	EXTI_Init(&EXTI_InitStructure);
-
-	// NIVC Konfiguration für WakeUp
-	NVIC_InitStructure.NVIC_IRQChannel = RTC_WKUP_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
-
-	RTC_WakeUpCmd(DISABLE);
-
-	// Konfiguration der Clock
-	// RTC_WakeUpClock_RTCCLK_Div2;    (122,070usek...4sek) Zeitbasis: 61,035us
-	// RTC_WakeUpClock_RTCCLK_Div4;    (244,140usek...8sek) Zeitbasis: 122,070us
-	// RTC_WakeUpClock_RTCCLK_Div8;    (488,281usek...16sek)Zeitbasis: 244,140us
-	// RTC_WakeUpClock_RTCCLK_Div16;   (976,562usek...32sek)Zeitbasis: 488,281us
-	// RTC_WakeUpClock_CK_SPRE_16bits; (1sek...65535sek)    Zeitbasis: 1s
-	// RTC_WakeUpClock_CK_SPRE_17bits: (1sek...131070sek)   Zeitbasis: 1s
-	RTC_WakeUpClockConfig(RTC_WakeUpClock_RTCCLK_Div16);
-
-	// RTC_WakeUpCouter mit einem Wert zwischen 0x0000...0xFFFF setzen
-	// ergibt sich aus 30s/488,281us = 61442
-	RTC_SetWakeUpCounter(61442);
-
-	// Disable RTC wakeup interrupt
-	RTC_ITConfig(RTC_IT_WUT,DISABLE);
-	// Clear RTC Wakeup WUTF Flag
-	RTC_ClearITPendingBit(RTC_IT_WUT);
-	RTC_ClearFlag(RTC_FLAG_WUTF);
-	// Clear PWR Wakeup WUF Flag
-	PWR_ClearFlag(PWR_CSR_WUF);
 }
