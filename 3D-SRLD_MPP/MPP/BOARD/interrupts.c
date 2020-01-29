@@ -301,15 +301,15 @@ void ADC_IRQHandler(void) {
 //=========================================================================
 void USART2_IRQHandler(void) {
 	//===== USART2
-	//UART2_IRQHandler();
-	//USART2_IRQ();
-	char input;
-	if (USART_GetFlagStatus(USART2, USART_FLAG_RXNE) == SET) {
-		input = (char) USART_ReceiveData(USART2);
-		if (input == 's') {
-			start_game = 1;
-		}
-	}
+//	UART2_IRQHandler();
+//	USART2_IRQ();
+//	char input;
+//	if (USART_GetFlagStatus(USART2, USART_FLAG_RXNE) == SET) {
+//		input = (char) USART_ReceiveData(USART2);
+//		if (input == 's') {
+//			start_game = 1;
+//		}
+//	}
 }
 
 //=========================================================================

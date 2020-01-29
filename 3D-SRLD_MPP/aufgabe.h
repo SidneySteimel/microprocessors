@@ -113,6 +113,9 @@ void aufgabe_A8_1_3(void);
 void init_taste_1(void);
 void init_taste_2(void);
 void check_reactions(void);
+void temp_ADC(void);
+void batterie_ADC(void);
+void spannung_ADC(void);
 
 
 //=========================================================================
